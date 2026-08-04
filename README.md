@@ -1,56 +1,11 @@
 # Prefa.News — v2 (Python)
 
-Reescrita completa do Prefa.News, migrando o back-end de **PHP** para
-**Python (FastAPI + SQLAlchemy)** e modernizando o front-end (tipografia,
-espaçamento, cores por região e **remoção das imagens de notícia**, que
-eram a principal fonte de lentidão e de falhas de ingestão na versão
-anterior).
+A complete rewrite of Prefa.News, migrating the back-end from **PHP** to **Python (FastAPI + SQLAlchemy)** and modernizing the front-end (typography, spacing, and colors).
 
-> A versão original em PHP está preservada, sem alterações, e pode ser
-> consultada para referência histórica. Este diretório é o projeto novo,
-> independente, que a substitui.
+> The original PHP version has been preserved, without changes, and can be
+> viewed [here](https://github.com/rbdinamite/prefa.news)
 
-## Por que migrar
-
-| Aspecto | v1 (PHP) | v2 (Python) |
-|---|---|---|
-| Back-end | PHP procedural + SimplePie | FastAPI + SQLAlchemy, tipado |
-| Consultas | SQL concatenado manualmente (**vulnerável a SQL Injection**) | Queries parametrizadas via SQLAlchemy |
-| Front-end | Bootstrap + ~15 arquivos CSS/JS de plugins, jQuery | 1 CSS próprio + 1 JS vanilla, sem frameworks pesados |
-| Imagens de notícia | Baixadas/raspadas de cada portal (frágil, lento) | Removidas do produto — cards focados em texto |
-| Testes | Nenhum | pytest (API, scoring, ingestão) |
-| Config sensível | Hard-coded em `class.Config.php` | Variáveis de ambiente (`.env`) |
-
-## Estrutura do projeto
-
-```
-prefa_news_py/
-├── app/
-│   ├── main.py            # Rotas de página (Jinja2) + API REST em /api
-│   ├── config.py          # Configurações via variáveis de ambiente
-│   ├── database.py        # Engine/Session SQLAlchemy
-│   ├── models.py          # Tabelas: City, News, Access, Newsletter, HighlightNews
-│   ├── schemas.py         # Modelos Pydantic da API
-│   ├── crud.py            # Consultas (substitui sys/controller.php)
-│   ├── scoring.py         # Algoritmo de relevância (substitui class.TextValuation.php)
-│   ├── ingestion/
-│   │   ├── parsers.py     # Leitura de feeds RSS (substitui SimplePie)
-│   │   ├── fetch_news.py  # Rotina de ingestão (substitui get_news.php)
-│   │   └── instagram.py   # Publicação opcional no Instagram
-│   ├── templates/         # HTML (Jinja2)
-│   └── static/            # CSS e JS novos, sem imagens de notícia
-├── scripts/
-│   └── seed_demo_data.py  # Popula o banco com dados fictícios para dev local
-├── tests/                 # pytest: API, scoring, parsers
-├── requirements.txt
-├── Dockerfile
-├── docker-compose.yml
-├── pytest.ini
-├── .env.example
-└── DEPLOY.md              # Passo a passo de produção
-```
-
-## Rodando localmente
+## Running locally
 
 ```bash
 python -m venv .venv
@@ -58,54 +13,36 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
 cp .env.example .env
-python -m scripts.seed_demo_data  # opcional: dados de exemplo
+python -m scripts.seed_demo_data  # optional: sample data
 
 uvicorn app.main:app --reload
 ```
 
-Acesse `http://localhost:8000`.
+Access `http://localhost:8000`.
 
-## Rodando os testes
+## Running tests
 
 ```bash
 pytest
 ```
 
-O `pytest.ini` já habilita relatório de cobertura (`pytest-cov`). Os testes
-cobrem:
+The `pytest.ini` file already enables coverage reporting (`pytest-cov`). The tests
+cover:
 
-- **`tests/test_api.py`** — todos os endpoints REST (`/api/news/*`,
-  `/api/cities/*`, `/api/access`, `/api/newsletter`), incluindo um teste
-  específico garantindo que a busca não é vulnerável a SQL Injection, e
-  testes das páginas HTML.
-- **`tests/test_scoring.py`** — regras de pontuação de notícia (palavras
-  boas/ruins, título em caixa alta, palavras duplicadas, RAKE, idade da
-  notícia, contagem de acessos).
-- **`tests/test_ingestion_parsers.py`** — parsing de feeds RSS e limpeza
-  de HTML/entidades.
+- **`tests/test_api.py`** — all REST endpoints (`/api/news/*`,
+`/api/cities/*`, `/api/access`, `/api/newsletter`), including a specific test
+ensuring the search function is not vulnerable to SQL injection, as well as
+tests for the HTML pages.
+- **`tests/test_scoring.py`** — news scoring rules (good/bad words,
+uppercase titles, duplicate words, RAKE, news age, access count).
+- **`tests/test_ingestion_parsers.py`** — RSS feed parsing and HTML/entity
+cleaning.
 
-## Ingestão de notícias
+## News ingestion
 
 ```bash
 python -m app.ingestion.fetch_news
 ```
 
-Substitui `sys/commands/get_news.php`. Veja `DEPLOY.md` para agendar essa
-rotina em produção (cron/systemd timer).
-
-## O que **não** foi portado 1:1
-
-- **Raspagem de imagem de notícia** (og:image, enclosures, tag
-  `imageFull`): removida por decisão de produto — o novo front-end não
-  exibe mais imagens, então essa complexidade toda saiu do pipeline de
-  ingestão, deixando-o mais rápido e resiliente.
-- **`class.HTMLFecam2.php`**: parser HTML experimental que não era
-  chamado pelo fluxo principal de ingestão (`get_news.php` usa apenas os
-  feeds RSS via SimplePie); não foi portado por não estar em uso.
-- **Geração de vídeo/Reels** (`class.VideoGenerator.php`): o script
-  original só tinha um `// TODO` sem implementação real; não havia nada
-  funcional para portar.
-- **Publicação no Instagram**: portada como módulo opcional
-  (`app/ingestion/instagram.py`), desligada por padrão
-  (`INSTAGRAM_ENABLED=false`), pois depende de credenciais de produção e
-  de uma imagem pública — algo que este pacote não gera mais.
+See `DEPLOY.md` to schedule this
+routine in production (cron/systemd timer).
