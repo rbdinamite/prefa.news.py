@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Sobre — Prefa.News{% endblock %}
+
+{% block content %}
+<section class="page-header">
+  <div class="container">
+    <h1>Sobre o Prefa.News</h1>
+  </div>
+</section>
+
+<section class="container about-content">
+  <p>Prefa.News é uma plataforma digital criada para agregar, analisar e amplificar notícias
+    e iniciativas positivas do poder público em municípios de Santa Catarina.</p>
+  <p>Todos os dias, prefeituras desenvolvem projetos valiosos e de alto impacto — mas essas
+    histórias muitas vezes ficam restritas à sua cidade de origem. O Prefa.News conecta portais
+    municipais, cataloga e amplia o acesso a essas notícias, para que cidadãos conheçam o que
+    acontece perto deles e gestores públicos possam se inspirar em soluções já testadas em
+    outros municípios.</p>
+
+  <h2>Municípios monitorados</h2>
+  <ul class="city-list">
+    {% for city in cities %}
+    <li>{{ city }}</li>
+    {% else %}
+    <li>Nenhum município ativo cadastrado ainda.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

@@ -1,0 +1,33 @@
+services:
+  web:
+    build: .
+    image: prefa-news:latest
+    restart: unless-stopped
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/srv/app/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://localhost:8000/')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # Executa a ingestão de notícias periodicamente (equivalente ao cron
+  # que chamava sys/commands/get_news.php na versão PHP).
+  # Aqui usamos um container simples com um loop + sleep; em produção
+  # real, prefira o systemd timer descrito em DEPLOY.md ou um agendador
+  # externo (ex.: cron do host, Kubernetes CronJob).
+  news-fetcher:
+    build: .
+    image: prefa-news:latest
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./data:/srv/app/data
+    entrypoint: >
+      sh -c "while true; do
+        python -m app.ingestion.fetch_news;
+        sleep 1800;
+      done"

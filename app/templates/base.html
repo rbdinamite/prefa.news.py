@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Prefa.News — Notícias públicas de Santa Catarina{% endblock %}</title>
+<meta name="description" content="Prefa.News agrega e destaca iniciativas positivas do poder público em municípios de Santa Catarina.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,500;9..144,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="icon" href="/static/img/favicon.ico">
+</head>
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="brand">Prefa<span>.News</span></a>
+    <nav class="main-nav">
+      <a href="/" class="{{ 'active' if active_page == 'home' }}">Início</a>      
+      <a href="/sobre" class="{{ 'active' if active_page == 'sobre' }}">Sobre</a>
+      <a href="/apoie" class="btn-support {{ 'active' if active_page == 'apoie' }}">Apoie</a>
+    </nav>
+    <form class="search-form" action="/busca" method="get">
+      <input type="search" name="q" placeholder="Buscar notícia ou cidade…" aria-label="Buscar">
+      <button type="submit" aria-label="Buscar">🔍</button>
+    </form>
+  </div>
+</header>
+
+<main>
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer">
+  <div class="container footer-inner">
+    <div>
+      <a href="/" class="brand">Prefa<span>.News</span></a>
+      <p>Plataforma digital que agrega, analisa e amplifica notícias e iniciativas positivas do
+        poder público em municípios de Santa Catarina.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Navegação</h4>
+      <a href="/sobre">Sobre o projeto</a>
+      <a href="/apoie">Apoie o Prefa.News</a>
+      <a href="/busca">Buscar notícias</a>
+    </div>
+    <div class="footer-newsletter">
+      <h4>Receba as novidades</h4>
+      <form id="newsletter-form">
+        <input type="email" name="mail" placeholder="seu@email.com" required>
+        <button type="submit">Assinar</button>
+      </form>
+      <p class="form-feedback" id="newsletter-feedback"></p>
+    </div>
+  </div>
+  <div class="container footer-bottom">
+    <span>&copy; {{ current_year }} Prefa.News. Todos os direitos reservados.</span>
+  </div>
+</footer>
+
+<script src="/static/js/app.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

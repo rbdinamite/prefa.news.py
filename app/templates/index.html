@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% from "_news_card.html" import news_card %}
+
+{% block content %}
+<section class="hero">
+  <div class="container">
+    <h1>Notícias públicas que fazem a diferença em Santa Catarina.</h1>
+    <p>Agregamos e destacamos iniciativas positivas das prefeituras catarinenses,
+      conectando cidadãos e gestores públicos.</p>
+  </div>
+</section>
+
+{% if news.main %}
+<section class="container section-highlights">
+  <div class="highlights-grid">
+    <div class="highlights-main">
+      {% for item in news.main[:1] %}{{ news_card(item, featured=True) }}{% endfor %}
+      <div class="highlights-secondary">
+        {% for item in news.main[1:] %}{{ news_card(item) }}{% endfor %}
+      </div>
+    </div>
+    <aside class="highlights-side">
+      <h2 class="side-title">Mais lidas</h2>
+      {% for item in news.side %}{{ news_card(item) }}{% endfor %}
+    </aside>
+  </div>
+</section>
+{% endif %}
+
+{% if news.roller %}
+<section class="container ticker-section">
+  <h2 class="section-title">Últimas notícias</h2>
+  <div class="news-ticker">
+    {% for item in news.roller %}
+    <span class="ticker-item">
+      <a href="{{ item.link }}" target="_blank" rel="noopener noreferrer">[{{ item.city }}] {{ item.title }}</a>
+    </span>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if news.more %}
+<section class="container section-more-news">
+  <h2 class="section-title">Mais notícias</h2>
+  <div class="news-grid">
+    {% for item in news.more %}{{ news_card(item) }}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}
