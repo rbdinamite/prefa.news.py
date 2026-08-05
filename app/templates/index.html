@@ -4,9 +4,9 @@
 {% block content %}
 <section class="hero">
   <div class="container">
-    <h1>Notícias públicas que fazem a diferença em Santa Catarina.</h1>
-    <p>Agregamos e destacamos iniciativas positivas das prefeituras catarinenses,
-      conectando cidadãos e gestores públicos.</p>
+    <h1>Public news that makes a difference in Santa Catarina.</h1>
+    <p>We aggregate and highlight positive initiatives of the public power in municipalities of Santa Catarina,
+      connecting citizens and public managers.</p>
   </div>
 </section>
 
@@ -20,7 +20,7 @@
       </div>
     </div>
     <aside class="highlights-side">
-      <h2 class="side-title">Mais lidas</h2>
+      <h2 class="side-title">Most read</h2>
       {% for item in news.side %}{{ news_card(item) }}{% endfor %}
     </aside>
   </div>
@@ -29,7 +29,7 @@
 
 {% if news.roller %}
 <section class="container ticker-section">
-  <h2 class="section-title">Últimas notícias</h2>
+  <h2 class="section-title">Latest news</h2>
   <div class="news-ticker">
     {% for item in news.roller %}
     <span class="ticker-item">
@@ -42,7 +42,7 @@
 
 {% if news.more %}
 <section class="container section-more-news">
-  <h2 class="section-title">Mais notícias</h2>
+  <h2 class="section-title">More news</h2>
   <div class="news-grid">
     {% for item in news.more %}{{ news_card(item) }}{% endfor %}
   </div>

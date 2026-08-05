@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% from "_news_card.html" import news_card %}
 
-{% block title %}Busca — Prefa.News{% endblock %}
+{% block title %}Search — Prefa.News{% endblock %}
 
 {% block content %}
 <section class="page-header">
   <div class="container">
-    <h1>{% if query %}Resultados para "{{ query }}"{% else %}Buscar notícias{% endif %}</h1>
+    <h1>{% if query %}Results for "{{ query }}"{% else %}Search news{% endif %}</h1>
   </div>
 </section>
 
@@ -17,9 +17,9 @@
     {% for item in results %}{{ news_card(item) }}{% endfor %}
   </div>
   {% elif query %}
-  <p class="empty-state">Nenhuma notícia encontrada com o termo "{{ query }}".</p>
+  <p class="empty-state">No news found with the term "{{ query }}".</p>
   {% else %}
-  <p class="empty-state">Digite um termo na busca acima para encontrar notícias.</p>
+  <p class="empty-state">Enter a term in the search above to find news.</p>
   {% endif %}
 </section>
 {% endblock %}

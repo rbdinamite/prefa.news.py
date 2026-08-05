@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>{% block title %}Prefa.News — Notícias públicas de Santa Catarina{% endblock %}</title>
-<meta name="description" content="Prefa.News agrega e destaca iniciativas positivas do poder público em municípios de Santa Catarina.">
+<title>{% block title %}Prefa.News — Public news from Santa Catarina{% endblock %}</title>
+<meta name="description" content="Prefa.News aggregates and highlights positive initiatives of the public power in municipalities of Santa Catarina.">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,15 +15,15 @@
 <body>
 <header class="site-header">
   <div class="container header-inner">
-    <a href="/" class="brand">Prefa<span>.News</span></a>
+    <a href="/" class="brand"><img src="/static/img/logo.png" alt="Prefa.News"></a>
     <nav class="main-nav">
-      <a href="/" class="{{ 'active' if active_page == 'home' }}">Início</a>      
-      <a href="/sobre" class="{{ 'active' if active_page == 'sobre' }}">Sobre</a>
-      <a href="/apoie" class="btn-support {{ 'active' if active_page == 'apoie' }}">Apoie</a>
+      <a href="/" class="{{ 'active' if active_page == 'home' }}">Home</a>      
+      <a href="/about" class="{{ 'active' if active_page == 'about' }}">About</a>
+      <a href="/support" class="btn-support {{ 'active' if active_page == 'support' }}">Support</a>
     </nav>
-    <form class="search-form" action="/busca" method="get">
-      <input type="search" name="q" placeholder="Buscar notícia ou cidade…" aria-label="Buscar">
-      <button type="submit" aria-label="Buscar">🔍</button>
+    <form class="search-form" action="/search" method="get">
+      <input type="search" name="q" placeholder="Search news or city…" aria-label="Search">
+      <button type="submit" aria-label="Search">🔍</button>
     </form>
   </div>
 </header>
@@ -36,26 +36,26 @@
   <div class="container footer-inner">
     <div>
       <a href="/" class="brand">Prefa<span>.News</span></a>
-      <p>Plataforma digital que agrega, analisa e amplifica notícias e iniciativas positivas do
-        poder público em municípios de Santa Catarina.</p>
+      <p>Digital platform that aggregates, analyzes and amplifies news and positive initiatives of the
+        public power in municipalities of Santa Catarina.</p>
     </div>
     <div class="footer-links">
-      <h4>Navegação</h4>
-      <a href="/sobre">Sobre o projeto</a>
-      <a href="/apoie">Apoie o Prefa.News</a>
-      <a href="/busca">Buscar notícias</a>
+      <h4>Navigation</h4>
+      <a href="/about">About the project</a>
+      <a href="/support">Support the Prefa.News</a>
+      <a href="/search">Search news</a>
     </div>
     <div class="footer-newsletter">
-      <h4>Receba as novidades</h4>
+      <h4>Receive the news</h4>
       <form id="newsletter-form">
-        <input type="email" name="mail" placeholder="seu@email.com" required>
-        <button type="submit">Assinar</button>
+        <input type="email" name="mail" placeholder="your@email.com" required>
+        <button type="submit">Subscribe</button>
       </form>
       <p class="form-feedback" id="newsletter-feedback"></p>
     </div>
   </div>
   <div class="container footer-bottom">
-    <span>&copy; {{ current_year }} Prefa.News. Todos os direitos reservados.</span>
+    <span>&copy; {{ current_year }} Prefa.News. All rights reserved.</span>
   </div>
 </footer>
 

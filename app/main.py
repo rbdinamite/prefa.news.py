@@ -29,26 +29,15 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 templates.env.globals["current_year"] = datetime.utcnow().year
 
-"""
-REGION_SLUGS = {
-    "grandefloripa": models.Region.GRANDE_FLORIPA,
-    "norte": models.Region.NORTE,
-    "oeste": models.Region.OESTE,
-    "serrana": models.Region.SERRANA,
-    "sul": models.Region.SUL,
-    "vale": models.Region.VALE,
-}
-"""
 
 @app.on_event("startup")
 def on_startup() -> None:
-    # Em produção prefira Alembic; para simplicidade local/demo criamos as
-    # tabelas automaticamente se ainda não existirem.
+    # In production prefer Alembic; for simplicity local/demo we create the tables automatically if they don't exist.
     Base.metadata.create_all(bind=engine)
 
 
 # ---------------------------------------------------------------------------
-# Páginas (server-side rendering com Jinja2)
+# Pages (server-side rendering with Jinja2)
 # ---------------------------------------------------------------------------
 
 @app.get("/", response_class=HTMLResponse)
@@ -60,49 +49,31 @@ def home(request: Request, db: Session = Depends(get_db)):
         {"request": request, "news": news, "active_page": "home"},
     )
 
-"""
-@app.get("/regiao/{slug}", response_class=HTMLResponse)
-def region_page(request: Request, slug: str, db: Session = Depends(get_db)):
-    if slug not in REGION_SLUGS:
-        raise HTTPException(status_code=404, detail="Região não encontrada")
-    regiao = REGION_SLUGS[slug]
-    news = crud.load_main_news(db, sector=regiao, search=None)
-    return templates.TemplateResponse(
-        "region.html",
-        {
-            "request": request,
-            "news": news,
-            "region_name": regiao.title(),
-            "slug": slug,
-            "active_page": slug,
-        },
-    )
-"""
 
-@app.get("/busca", response_class=HTMLResponse)
+@app.get("/search", response_class=HTMLResponse)
 def search_page(request: Request, q: str = "", db: Session = Depends(get_db)):
     news = crud.load_main_news(db, sector=None, search=q) if q else {"main": [], "side": [], "roller": [], "more": []}
     return templates.TemplateResponse(
         "search.html",
-        {"request": request, "news": news, "query": q, "active_page": "busca"},
+        {"request": request, "news": news, "query": q, "active_page": "search"},
     )
 
 
-@app.get("/sobre", response_class=HTMLResponse)
+@app.get("/about", response_class=HTMLResponse)
 def about_page(request: Request, db: Session = Depends(get_db)):
     cities = crud.load_active_cities(db)
     return templates.TemplateResponse(
-        "about.html", {"request": request, "cities": cities, "active_page": "sobre"}
+        "about.html", {"request": request, "cities": cities, "active_page": "about"}
     )
 
 
-@app.get("/apoie", response_class=HTMLResponse)
-def apoie_page(request: Request):
-    return templates.TemplateResponse("apoie.html", {"request": request, "active_page": "apoie"})
+@app.get("/support", response_class=HTMLResponse)
+def support_page(request: Request):
+    return templates.TemplateResponse("support.html", {"request": request, "active_page": "support"})
 
 
 # ---------------------------------------------------------------------------
-# API JSON (equivalente às ações do antigo sys/controller.php)
+# API JSON (equivalent to the actions of the old sys/controller.php)
 # ---------------------------------------------------------------------------
 
 api = APIRouter()
@@ -117,11 +88,6 @@ def api_main_news(
     data = crud.load_main_news(db, sector, search)
     return data
 
-"""
-@api.get("/news/sectors", response_model=schemas.SectorBlock)
-def api_sector_news(search: str | None = Query(default=None), db: Session = Depends(get_db)):
-    return crud.load_sector_news(db, search)
-"""
 
 @api.get("/news/more-fixed", response_model=list[schemas.NewsOut])
 def api_more_fixed(
@@ -164,15 +130,15 @@ def api_save_click(payload: schemas.AccessIn, request: Request, db: Session = De
         }
     )
     crud.save_click(db, payload.news_id, payload.type, server_meta)
-    return {"result": True, "message": "Dados registrados com sucesso"}
+    return {"result": True, "message": "Data registered successfully"}
 
 
 @api.post("/newsletter", response_model=schemas.MessageOut)
 def api_save_newsletter(payload: schemas.NewsletterIn, db: Session = Depends(get_db)):
     if crud.newsletter_email_exists(db, payload.mail):
-        raise HTTPException(status_code=409, detail="E-mail já cadastrado")
+        raise HTTPException(status_code=409, detail="Email already registered")
     crud.save_newsletter(db, payload.mail)
-    return {"result": True, "message": "E-mail registrado com sucesso"}
+    return {"result": True, "message": "Email registered successfully"}
 
 
 app.include_router(api, prefix="/api")

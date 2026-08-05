@@ -4,25 +4,25 @@
 {% block content %}
 <section class="page-header">
   <div class="container">
-    <h1>Sobre o Prefa.News</h1>
+    <h1>About the Prefa.News</h1>
   </div>
 </section>
 
 <section class="container about-content">
-  <p>Prefa.News é uma plataforma digital criada para agregar, analisar e amplificar notícias
-    e iniciativas positivas do poder público em municípios de Santa Catarina.</p>
-  <p>Todos os dias, prefeituras desenvolvem projetos valiosos e de alto impacto — mas essas
-    histórias muitas vezes ficam restritas à sua cidade de origem. O Prefa.News conecta portais
-    municipais, cataloga e amplia o acesso a essas notícias, para que cidadãos conheçam o que
-    acontece perto deles e gestores públicos possam se inspirar em soluções já testadas em
-    outros municípios.</p>
+  <p>The Prefa.News is a digital platform created to aggregate, analyze and amplify news
+    and positive initiatives of the public power in municipalities of Santa Catarina.</p>
+  <p>Every day, municipalities develop valuable projects and high impact — but these
+    stories often remain restricted to their city of origin. The Prefa.News connects municipal
+    portals, catalogs and amplifies access to these news, so that citizens know what
+    happens near them and public managers can be inspired by solutions already tested in
+    other municipalities.</p>
 
-  <h2>Municípios monitorados</h2>
+  <h2>Monitored municipalities</h2>
   <ul class="city-list">
     {% for city in cities %}
     <li>{{ city }}</li>
     {% else %}
-    <li>Nenhum município ativo cadastrado ainda.</li>
+    <li>No active municipalities registered yet.</li>
     {% endfor %}
   </ul>
 </section>
