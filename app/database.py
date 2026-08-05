@@ -7,7 +7,7 @@ from app.config import get_settings
 
 settings = get_settings()
 
-# Garante que a pasta ./data exista quando usarmos SQLite local
+# Ensures that the ./data folder exists when using local SQLite.
 if settings.DATABASE_URL.startswith("sqlite"):
     db_path = settings.DATABASE_URL.split("///")[-1]
     Path(db_path).parent.mkdir(parents=True, exist_ok=True)
@@ -23,7 +23,7 @@ class Base(DeclarativeBase):
 
 
 def get_db():
-    """Dependency do FastAPI: abre e fecha a sessão por requisição."""
+    """Dependency for FastAPI: opens and closes the session per request."""
     db = SessionLocal()
     try:
         yield db

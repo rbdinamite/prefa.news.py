@@ -1,13 +1,5 @@
 """
-Reimplementação em Python das regras de pontuação de notícias que, na
-versão PHP, estavam espalhadas entre sys/classes/class.TextValuation.php
-(algoritmo estilo RAKE) e o corpo de sys/commands/get_news.php (as oito
-"validações" de peso).
-
-Não usamos bibliotecas pesadas de NLP (nem a extensão SQLite específica
-do PHP text-analysis) — o algoritmo de RAKE simplificado é implementado
-aqui mesmo em ~40 linhas, o que facilita testar e não exige dependências
-binárias em produção.
+Scoring rules using the RAKE algorithm.
 """
 from __future__ import annotations
 
@@ -19,18 +11,17 @@ from pathlib import Path
 
 STOP_WORDS_PATH = Path(__file__).parent / "ingestion" / "stop_words_pt.txt"
 
-# Palavras que reduzem a relevância de uma notícia (ex.: editais, boletins administrativos)
+# Words that reduce the relevance of a news
 POOR_WORDS = [
-    "EDITAL", "PROCESSO SELETIVO", "BOLETIM", "COMUNICADO", "/", "COVID",
-    "COVID-19", "DECRETO", "PESAR", "FALECIMENTO", "AUDIÊNCIA", "LICITA",
-    "PROCESSO", "DEPUTADO",
+    "PUBLIC NOTICE", "SELECTION PROCESS", "BULLETIN", "ANNOUNCEMENT", "/", "COVID",
+    "COVID-19", "DECREE", "CONDOLENCES", "DEATH", "HEARING", "PROCUREMENT",
+    "PROCESS", "DEPUTY",
 ]
 
-# Palavras que aumentam a relevância (conquistas, prêmios, abrangência maior)
+# Words that increase the relevance of a news
 GOOD_WORDS = [
-    "NACIONAL", "ESTADUAL", "APRESENTAÇÃO", "APRESENTA", "PREMIAÇÃO",
-    "PREMIA", "PRÊMIO", "GRATUITO", "GRATUITA", "GRÁTIS", "VENCE",
-    "VENCEDOR", "DESTAQUE", "INTERNACIONAL",
+    "NATIONAL", "STATE", "PRESENTATION", "PRESENTS", "AWARD",
+    "AWARDS", "PRIZE", "FREE", "WINNER", "HIGHLIGHT", "INTERNATIONAL",
 ]
 
 MISSING_DESCRIPTION_PENALTY = -100
@@ -44,7 +35,7 @@ ACCESS_WEIGHT = 0.9
 HOURLY_DECAY = 0.95
 SHORT_TITLE_PENALTY_PER_WORD = 0.99
 LONG_TITLE_PENALTY_PER_WORD = 0.75
-CONTENT_BONUS_GENERIC = 20  # usado quando não há conteúdo completo (feeds RSS simples)
+CONTENT_BONUS_GENERIC = 20  # used when there is no complete content (simple RSS feeds)
 
 
 @lru_cache
@@ -63,21 +54,19 @@ def _tokenize(text: str) -> list[str]:
 
 def check_rake_score(text: str, keyword_score_threshold: float = 100.0) -> float:
     """
-    Versão simplificada de RAKE (Rapid Automatic Keyword Extraction):
-    agrupa palavras contíguas que não são stop-words em "frases-candidatas",
-    pontua cada palavra pelo grau de co-ocorrência dividido pela frequência,
-    e soma o score das frases cujo total ultrapassa o limiar.
+    Simplified version of RAKE (Rapid Automatic Keyword Extraction):
+    groups contiguous words that are not stop-words into "candidate phrases",
+    scores each word by the degree of co-occurrence divided by frequency,
+    and sums the scores of phrases whose total exceeds the threshold.
 
-    Retorna um valor pequeno normalizado (equivalente ao antigo
-    checkRake() de class.TextValuation.php, porém sem as dependências
-    externas da lib yooper/php-text-analysis).
+    Returns a small normalized value.
     """
     stop_words = _load_stop_words()
     words = _tokenize(text)
     if not words:
         return 0.0
 
-    # Divide o texto em frases-candidatas, quebrando em stop-words
+    # Divide the text into candidate phrases, breaking on stop-words
     phrases: list[list[str]] = []
     current: list[str] = []
     for w in words:
@@ -143,10 +132,8 @@ def compute_news_value(
     access_count: int = 0,
 ) -> float:
     """
-    Recalcula o "peso" (relevância) de uma notícia, replicando as oito
-    validações originais de get_news.php (checagem de título vazio,
-    idade da notícia, caixa alta, palavras boas/ruins, duplicidade de
-    palavras, acessos e conteúdo).
+    Recalculates the "weight" (relevance) of a news, replicating the eight
+    original validations.
     """
     value = 0.0
     title = (title or "").strip()
@@ -157,7 +144,7 @@ def compute_news_value(
 
     title_upper = title.upper()
 
-    # Idade da notícia (desconto por hora decorrida desde a publicação)
+    # News age (discount by hour elapsed since publication)
     hours_elapsed = (now - published_at).total_seconds() / 3600
     value -= hours_elapsed * HOURLY_DECAY
 

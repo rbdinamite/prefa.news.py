@@ -1,11 +1,5 @@
 """
-Modelos ORM equivalentes às tabelas usadas na versão PHP original:
-city, news, access, newsletter, highlight_news.
-
-Mantivemos os nomes de campo próximos aos originais para facilitar a
-migração de dados de bd.db (SQLite antigo) para o novo banco, mas os
-tipos agora são fortemente tipados e as constraints (FK, unique, index)
-que faltavam no schema original foram adicionadas.
+ORM models equivalent to the tables used in the original PHP version.
 """
 from datetime import datetime
 
@@ -23,26 +17,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
-"""
-class Region:    
-
-    SUL = "SUL"
-    GRANDE_FLORIPA = "GRANDE FLORIPA"
-    NORTE = "NORTE"
-    OESTE = "OESTE"
-    SERRANA = "SERRANA"
-    VALE = "VALE"
-
-    ALL = [SUL, GRANDE_FLORIPA, NORTE, OESTE, SERRANA, VALE]
-"""
 
 class FeedType:
-    """Equivalente à coluna city.url_type."""
+    """Equivalent to the city.url_type column."""
 
     IPM = "IPM"
     FECAM2 = "FECAM2"
     P1 = "P1"
-    PROPRIO = "PROPRIO"  # site com layout próprio, sem RSS padrão (não é ingerido automaticamente)
+    PROPRIO = "PROPRIO"  # site with proprietary layout, no standard RSS feed (not automatically ingested)
 
 
 class City(Base):
@@ -50,7 +32,6 @@ class City(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     name: Mapped[str] = mapped_column(String(120), nullable=False, index=True)
-    #regiao: Mapped[str] = mapped_column(String(30), nullable=False, index=True)
     url_type: Mapped[str] = mapped_column(String(20), nullable=False, default=FeedType.PROPRIO)
     url_path: Mapped[str | None] = mapped_column(String(500), nullable=True)
     instagram: Mapped[str | None] = mapped_column(String(120), nullable=True)
@@ -88,7 +69,7 @@ class News(Base):
 
 
 class Access(Base):
-    """Registra cliques em notícias (equivalente à tabela access)."""
+    """Registers clicks on news."""
 
     __tablename__ = "access"
 
@@ -96,7 +77,7 @@ class Access(Base):
     timestamp: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False)
     news_id: Mapped[int] = mapped_column(ForeignKey("news.id"), nullable=False, index=True)
     type: Mapped[str | None] = mapped_column(String(30), nullable=True)
-    server: Mapped[str | None] = mapped_column(Text, nullable=True)  # metadados da requisição (JSON)
+    server: Mapped[str | None] = mapped_column(Text, nullable=True)  # request metadata (JSON)
 
 
 class Newsletter(Base):
@@ -108,7 +89,7 @@ class Newsletter(Base):
 
 
 class HighlightNews(Base):
-    """Destaques (do dia / semana), equivalente à tabela highlight_news."""
+    """Highlights (of the day / week)."""
 
     __tablename__ = "highlight_news"
 

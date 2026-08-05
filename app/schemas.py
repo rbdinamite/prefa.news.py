@@ -4,7 +4,7 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class NewsOut(BaseModel):
-    """Representação pública de uma notícia (sem imagem, por decisão de produto)."""
+    """Public presentation of a news item."""
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -18,22 +18,13 @@ class NewsOut(BaseModel):
 
 
 class NewsBlock(BaseModel):
-    """Bloco usado na home: destaques, laterais e ticker."""
+    """Block used on the home page."""
 
     main: list[NewsOut]
     side: list[NewsOut]
     roller: list[NewsOut]
     more: list[NewsOut]
 
-"""
-class SectorBlock(BaseModel):
-    south: list[NewsOut]
-    center: list[NewsOut]
-    north: list[NewsOut]
-    west: list[NewsOut]
-    montain: list[NewsOut]
-    valley: list[NewsOut]
-"""
 
 class CityOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
