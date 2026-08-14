@@ -3,7 +3,7 @@ Substitui a dependência da lib SimplePie (assets/lib/SimplePie) usada na
 versão PHP para ler os feeds RSS das prefeituras.
 
 Usamos `feedparser`, que já normaliza RSS 1.0/2.0 e Atom, cobrindo os
-três formatos que a versão antiga tratava manualmente (IPM, FECAM2, P1).
+três formatos que a versão antiga tratava manualmente (IPM, FECAM, PROPRIO).
 
 Decisão de produto: a nova versão do front-end não exibe mais imagens de
 notícia, então não é mais necessário abrir cada página da notícia só para
@@ -49,7 +49,7 @@ class RawNewsItem:
     link: str
     published_at: datetime
     description: str
-    has_full_content: bool  # True quando o feed já traz o corpo completo da notícia (ex.: FECAM2)
+    has_full_content: bool  # True quando o feed já traz o corpo completo da notícia (ex.: FECAM)
 
 
 def _entry_datetime(entry) -> datetime:
@@ -60,7 +60,7 @@ def _entry_datetime(entry) -> datetime:
 
 
 def _entry_description(entry, feed_type: str) -> tuple[str, bool]:
-    if feed_type == FeedType.FECAM2:
+    if feed_type == FeedType.FECAM:
         content = entry.get("content")
         if content:
             return strip_html(content[0].get("value", "")), True
@@ -71,7 +71,7 @@ def _entry_description(entry, feed_type: str) -> tuple[str, bool]:
 def parse_feed(url: str, feed_type: str, limit: int = 5, timeout: int = 15) -> list[RawNewsItem]:
     """
     Faz o parse de um feed RSS/Atom e devolve uma lista normalizada de
-    itens, independente do "layout" original (IPM, FECAM2, P1).
+    itens, independente do "layout" original (IPM, FECAM, PROPRIO).
     """
     parsed = feedparser.parse(url, request_headers={"User-Agent": "PrefaNewsBot/2.0"})
     items: list[RawNewsItem] = []

@@ -20,7 +20,7 @@ from __future__ import annotations
 
 import logging
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 from sqlalchemy import func, select
 
@@ -67,16 +67,16 @@ def fetch_new_news(db) -> int:
 
         if not items:
             continue
-
+        
         newest = items[0]
-        age_days = (datetime.utcnow() - newest.published_at).days
+        age_days = (datetime.now() - newest.published_at).days
         logger.info("Notícia mais recente de [%s]: %s (%s dias atrás)", city.name, newest.published_at.date(), age_days)
         if age_days > settings.NEWS_MAX_AGE_DAYS_TO_IGNORE_CITY:
             logger.info("Feed de [%s] está desatualizado (>%s dias). Ignorando cidade nesta rodada.",
                         city.name, settings.NEWS_MAX_AGE_DAYS_TO_IGNORE_CITY)
             continue
 
-        city.lastcheck_date = datetime.utcnow().strftime("%Y-%m-%d")
+        city.lastcheck_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         city.lastnews_date = newest.published_at.strftime("%Y-%m-%d")
 
         for item in items:
@@ -116,7 +116,7 @@ def fetch_new_news(db) -> int:
 
 def rescore_news(db) -> None:
     logger.info("## AVALIAÇÃO DAS NOTÍCIAS ##")
-    now = datetime.utcnow()
+    now = datetime.now()
     rows = db.execute(
         select(News, City.url_type)
         .join(City, News.city_id == City.id)
@@ -133,7 +133,7 @@ def rescore_news(db) -> None:
             description=news.description,
             published_at=news.date,
             now=now,
-            has_full_content=(url_type == FeedType.FECAM2),
+            has_full_content=(url_type == FeedType.FECAM),
             access_count=access_count or 0,
         )
         if new_value != news.value:
@@ -185,7 +185,7 @@ def rescore_news(db) -> None:
 
 
 def register_daily_highlight(db) -> None:
-    today = datetime.utcnow().strftime("%Y-%m-%d")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     already = db.execute(
         select(func.count(HighlightNews.id)).where(
             HighlightNews.date == today, HighlightNews.type == "portal"
@@ -212,7 +212,7 @@ def register_daily_highlight(db) -> None:
 
 def run() -> None:
     Base.metadata.create_all(bind=engine)
-    started_at = datetime.utcnow()
+    started_at = datetime.now(timezone.utc)
     logger.info("#" * 30)
     logger.info("Iniciando execução da ingestão de notícias")
     logger.info("#" * 30)
@@ -225,7 +225,7 @@ def run() -> None:
     finally:
         db.close()
 
-    elapsed = datetime.utcnow() - started_at
+    elapsed = datetime.now(timezone.utc) - started_at
     logger.info("Finalizado em %s", timedelta(seconds=int(elapsed.total_seconds())))
 
 
