@@ -22,8 +22,7 @@ class FeedType:
     """Equivalent to the city.url_type column."""
 
     IPM = "IPM"
-    FECAM2 = "FECAM2"
-    P1 = "P1"
+    FECAM = "FECAM"
     PROPRIO = "PROPRIO"  # site with proprietary layout, no standard RSS feed (not automatically ingested)
 
 
