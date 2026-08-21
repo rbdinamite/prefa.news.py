@@ -53,6 +53,7 @@ class News(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     city_id: Mapped[int] = mapped_column(ForeignKey("city.id"), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String(500), nullable=False)
+    title_pt: Mapped[str] = mapped_column(String(500), nullable=True)    
     date: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
     news_url: Mapped[str] = mapped_column(String(1000), nullable=False)
     img_url: Mapped[str | None] = mapped_column(String(1000), nullable=True)
