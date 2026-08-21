@@ -256,12 +256,19 @@ com segurança:
    no `.env` (ex.: `postgresql+psycopg://usuario:senha@host:5432/prefa_news`)
    e instalando o driver (`pip install psycopg[binary]`). O SQLAlchemy
    cuida do resto — não é necessário alterar `models.py`.
-3. Para gerenciar migrações de schema de forma segura em produção
-   (adicionar colunas sem perder dados), recomenda-se introduzir o
-   **Alembic** (`pip install alembic && alembic init migrations`). O
-   projeto cria as tabelas automaticamente via `Base.metadata.create_all`
-   por simplicidade, mas o Alembic é o próximo passo natural assim que
-   o schema começar a evoluir com frequência.
+3. As migrações de schema são gerenciadas com **Alembic**. Depois de
+  atualizar o código, execute antes de reiniciar a aplicação:
+  ```bash
+  source .venv/bin/activate
+  alembic upgrade head
+  ```
+  O startup ainda usa `Base.metadata.create_all` para instalações locais,
+  mas não substitui as migrations em produção.
+
+4. Para gerar os insights que relacionam notícias de cidades diferentes,
+  configure `GROQ_ENABLED=true` e `GROQ_API_KEY` no `.env`. A integração
+  usa a API compatível de chat da Groq; os limites gratuitos dependem do
+  plano vigente da conta Groq.
 
 ---
 

@@ -26,6 +26,7 @@ from app.config import get_settings
 from app.database import Base, SessionLocal, engine
 from app.ingestion.parsers import parse_feed
 from app.ingestion.translate import translate_title_to_english
+from app.insights import generate_insights
 from app.models import Access, City, FeedType, HighlightNews, News
 from app.scoring import compute_news_value
 
@@ -232,6 +233,9 @@ def run() -> None:
     try:
         fetch_new_news(db)
         rescore_news(db)
+        generated = generate_insights(db)
+        if generated:
+            logger.info("Generated %s cross-city insights", generated)
         #register_daily_highlight(db)
     finally:
         db.close()

@@ -36,6 +36,12 @@ class Settings(BaseSettings):
     NEWS_MAX_AGE_DAYS_TO_IGNORE_CITY: int = 15
     NEWS_MIN_SCORE_TO_REMOVE: int = -1000
 
+    # AI-generated cross-city insights
+    GROQ_ENABLED: bool = False
+    GROQ_API_KEY: str = ""
+    GROQ_API_BASE_URL: str = ""
+    GROQ_MODEL: str = ""
+
     # CORS (if the front-end is consumed separately)
     CORS_ORIGINS: list[str] = ["*"]
 

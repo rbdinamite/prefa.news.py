@@ -1,0 +1,13 @@
+{% macro insight_card(item, featured=False) %}
+<article class="insight-card {{ 'insight-card--featured' if featured }}"
+         data-insight-id="{{ item.id }}" data-insight-link="{{ item.link }}">
+  <div class="insight-card__eyebrow">
+    <span class="insight-card__topic">{{ item.topic }}</span>
+    <span class="region-tag">{{ item.cities | join(', ') }}</span>
+  </div>
+  <h3 class="insight-card__title">
+    <a href="{{ item.link }}" target="_blank" rel="noopener noreferrer" class="insight-open-link">{{ item.title }}</a>
+  </h3>
+  <p class="insight-card__summary">{{ item.summary }}</p>
+</article>
+{% endmacro %}

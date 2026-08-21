@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
+from app import crud, schemas
 from app.config import get_settings
 from app.database import Base, engine, get_db
 
@@ -43,10 +43,11 @@ def on_startup() -> None:
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request, db: Session = Depends(get_db)):
     news = crud.load_main_news(db, sector=None, search=None)
+    insights = crud.load_insights(db)
     #sectors = crud.load_sector_news(db, search=None)
     return templates.TemplateResponse(
         "index.html",
-        {"request": request, "news": news, "active_page": "home"},
+        {"request": request, "news": news, "insights": insights, "active_page": "home"},
     )
 
 

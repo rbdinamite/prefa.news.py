@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% from "_news_card.html" import news_card %}
+{% from "_insight_card.html" import insight_card %}
 
 {% block content %}
 <section class="hero">
@@ -45,6 +46,19 @@
   <h2 class="section-title">More news</h2>
   <div class="news-grid">
     {% for item in news.more %}{{ news_card(item) }}{% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if insights %}
+<section class="container insights-section" aria-labelledby="insights-title">
+  <div class="insights-heading">
+    <div>
+      <h2 class="section-title" id="section-title">Insights (AI analysis)</h2>
+    </div>  
+  </div>
+  <div class="insights-grid">
+    {% for insight in insights %}{{ insight_card(insight) }} {% endfor %}
   </div>
 </section>
 {% endif %}

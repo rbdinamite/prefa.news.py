@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from app.models import Access, City, HighlightNews, News, Newsletter
+from app.models import Access, City, HighlightNews, Insight, News, Newsletter
 
 
 def _base_news_query():
@@ -59,6 +59,24 @@ def load_main_news(db: Session, sector: str | None, search: str | None) -> dict:
         "roller": _rows_to_dicts(roller),
         "more": _rows_to_dicts(more),
     }
+
+
+def load_insights(db: Session, limit: int = 5) -> list[dict]:
+    rows = db.execute(
+        select(Insight)
+        .order_by(Insight.generated_at.desc(), Insight.id.desc())
+        .limit(limit)
+    ).scalars().all()
+    return [
+        {
+            "topic": insight.topic,
+            "title": insight.title,
+            "summary": insight.summary,
+            "cities": insight.cities,
+            "generated_at": insight.generated_at,
+        }
+        for insight in rows
+    ]
 
 """
 def load_sector_news(db: Session, search: str | None) -> dict:

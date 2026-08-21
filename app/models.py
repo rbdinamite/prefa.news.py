@@ -9,6 +9,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    JSON,
     String,
     Text,
     UniqueConstraint,
@@ -97,3 +98,17 @@ class HighlightNews(Base):
     news_id: Mapped[int] = mapped_column(ForeignKey("news.id"), nullable=False, index=True)
     date: Mapped[str] = mapped_column(String(10), nullable=False, index=True)  # YYYY-MM-DD
     type: Mapped[str] = mapped_column(String(20), default="portal", nullable=False)  # portal | feed | reels
+
+
+class Insight(Base):
+    """AI-generated patterns shared by news from multiple cities."""
+
+    __tablename__ = "insights"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    topic: Mapped[str] = mapped_column(String(160), nullable=False)
+    title: Mapped[str] = mapped_column(String(300), nullable=False)
+    summary: Mapped[str] = mapped_column(Text, nullable=False)
+    cities: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    news_ids: Mapped[list[int]] = mapped_column(JSON, nullable=False)
+    generated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, nullable=False, index=True)
