@@ -112,10 +112,12 @@ def generate_insights(db: Session) -> int:
         select(Insight.id).where(Insight.generated_at >= datetime.combine(today, datetime.min.time()))
     )
     if already_generated:
+        logger.info("Insights already generated today")
         return 0
 
     context = _news_context(db)
     if not context:
+        logger.info("No news available for insight generation")
         return 0
 
     prompt = (
