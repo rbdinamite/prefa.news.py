@@ -13,8 +13,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
-    command: bash -c "alembic upgrade head && uvicorn app.main:app"
-    
+    command: bash -c "alembic -c /opt/prefa-news/alembic.ini upgrade head && uvicorn app.main:app"
+
   # Executa a ingestão de notícias periodicamente (equivalente ao cron
   # que chamava sys/commands/get_news.php na versão PHP).
   # Aqui usamos um container simples com um loop + sleep; em produção
