@@ -91,25 +91,40 @@ def fetch_new_news(db) -> int:
             ).scalar()
             if exists:
                 continue
-            news = News(
-                city_id=city.id,
-                title=title_en,
-                title_pt=item.title,
-                date=item.published_at,
-                news_url=item.link,
-                description=item.description,
-                active=False,
-                value=0.0,
-                pub_instagram=False,
-            )
-            db.add(news)
-            inserted_count += 1
-            logger.info(
-                "News inserted: [%s] [%s] (original: [%s])",
-                item.published_at,
-                title_en,
-                item.title,
-            )
+            try:
+                logger.info(
+                    "News to insert: City [%s] [%s] [%s] (original: [%s])",
+                    city.name,
+                    item.published_at,
+                    title_en,
+                    item.title,
+                )
+                
+                news = News(
+                    city_id=city.id,
+                    title=title_en,
+                    title_pt=item.title,
+                    date=item.published_at,
+                    news_url=item.link,
+                    description=item.description,
+                    active=False,
+                    value=0.0,
+                    pub_instagram=False,
+                )
+                db.add(news)
+                inserted_count += 1
+                logger.info(
+                    "Inserted: [%s] [%s]",
+                    item.published_at,
+                    title_en
+                )
+            except Exception as exc:
+                logger.warning(
+                    "Failed to insert news from [%s] [%s]: %s",
+                    city.name,
+                    item.published_at,
+                    exc,
+                )
 
     db.commit()
     logger.info("Check completed. %s new news items inserted.", inserted_count)
