@@ -21,7 +21,8 @@ def _news_context(db: Session) -> list[dict]:
         select(News.id, City.name, News.title_pt, News.title, News.description, News.date)
         .join(City, News.city_id == City.id)
         .where(News.active.is_(True))
-        .order_by(News.date.desc())
+        .order_by(News.value.desc())
+        .limit(50)
     ).all()
     return [
         {
