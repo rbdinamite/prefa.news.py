@@ -29,7 +29,7 @@ def _news_context(db: Session) -> list[dict]:
             "id": row.id,
             "city": row.name,
             "title": row.title_pt or row.title,
-            "description": (row.description or "")[:500],
+            #"description": (row.description or "")[:500],
             "date": row.date.isoformat(),
         }
         for row in rows
