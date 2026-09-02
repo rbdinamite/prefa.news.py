@@ -132,6 +132,8 @@ def generate_insights(db: Session) -> int:
         "e usar somente news_ids presentes no conjunto fornecido.\n\n"
         f"Notícias:\n{json.dumps(context, ensure_ascii=False)}"
     )
+
+    logger.info("Prompt Size: %s characters", len(prompt))
     try:
         client = OpenAI(
             api_key=settings.GROQ_API_KEY,
