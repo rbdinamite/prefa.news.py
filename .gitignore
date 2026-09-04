@@ -10,3 +10,5 @@ data/
 htmlcov/
 *.egg-info/
 .DS_Store
+prefa.news.pem
+alembic/README

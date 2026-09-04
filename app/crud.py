@@ -67,35 +67,37 @@ def load_insights(db: Session, limit: int = 5) -> list[dict]:
         .order_by(Insight.generated_at.desc(), Insight.id.desc())
         .limit(limit)
     ).scalars().all()
+
+    news_ids = {
+        news_id
+        for insight in rows
+        for news_id in (insight.news_ids or [])
+    }
+    news_by_id = {
+        news.id: {
+            "id": news.id,
+            "title": news.title,
+            "link": news.news_url,
+        }
+        for news in db.execute(select(News).where(News.id.in_(news_ids))).scalars()
+    } if news_ids else {}
+
     return [
         {
+            "id": insight.id,
             "topic": insight.topic,
             "title": insight.title,
             "summary": insight.summary,
             "cities": insight.cities,
             "generated_at": insight.generated_at,
+            "sources": [
+                news_by_id[news_id]
+                for news_id in (insight.news_ids or [])
+                if news_id in news_by_id
+            ],
         }
         for insight in rows
     ]
-
-"""
-def load_sector_news(db: Session, search: str | None) -> dict:
-    result = {}
-    mapping = {
-        "south": "SUL",
-        "center": "GRANDE FLORIPA",
-        "north": "NORTE",
-        "west": "OESTE",
-        "montain": "SERRANA",
-        "valley": "VALE",
-    }
-    for key, regiao in mapping.items():
-        query = _apply_filters(_base_news_query(), regiao, search).order_by(
-            News.value.desc(), News.date.desc()
-        ).limit(6)
-        result[key] = _rows_to_dicts(db.execute(query).all())
-    return result
-"""
 
 def load_more_fixed_news(db: Session, sector: str | None, search: str | None) -> list[dict]:
     query = _apply_filters(_base_news_query(), sector, search).order_by(

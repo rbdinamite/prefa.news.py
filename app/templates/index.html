@@ -58,7 +58,7 @@
     </div>  
   </div>
   <div class="insights-grid">
-    {% for insight in insights %}{{ insight_card(insight) }} {% endfor %}
+    {% for insight in insights %}{{ insight_card(insight, show_sources=True) }} {% endfor %}
   </div>
 </section>
 {% endif %}
