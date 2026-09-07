@@ -1,37 +1,32 @@
 # Guia de Deploy em Produção — Prefa.News v2
 
-Este documento descreve, passo a passo, como colocar a versão Python do
-Prefa.News em produção. Há dois caminhos: **Docker (recomendado)** e
-**instalação manual em VPS (systemd + Nginx)**. Escolha um dos dois.
+This document describe, step by step, how to put the project in production using **Docker**
 
-Pré-requisitos gerais:
-- Um servidor Linux (Ubuntu 22.04/24.04 ou Debian 12 recomendados).
-- Um domínio apontando para o IP do servidor (ex.: `prefa.news`).
-- Acesso SSH com um usuário com permissão de sudo.
+Requirements:
+- Linux server (Ubuntu 22.04/24.04 or Debian 12).
+- A domain ponting for a server IP (ex.: `prefa.news`).
+- SSH access and user with root privilegies.
 
 ---
 
-## Caminho A — Deploy com Docker (recomendado)
-
-### 1. Instalar Docker e Docker Compose
+### 1. Install Docker and Docker Compose
 
 ```bash
 curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
-# saia e entre novamente na sessão SSH para o grupo docker fazer efeito
+# logout and login in SSH session to Docket activation
 ```
 
-### 2. Enviar o código para o servidor
+### 2. Send code to server
 
 ```bash
-# na sua máquina local, dentro da pasta do projeto
-rsync -avz --exclude .venv --exclude data ./ usuario@SEU_SERVIDOR:/opt/prefa-news/
+# on localhost, indice folder's project
+rsync -avz --exclude .venv --exclude data ./ usuario@YOUR_SERVER:/opt/prefa-news/
 ```
 
-Ou, se preferir, use um repositório Git privado e faça `git clone` direto
-no servidor.
+Or, if you prefer, use a private Git repository and run `git clone` directly on the server.
 
-### 3. Configurar variáveis de ambiente
+### 3. Configure environment variables
 
 ```bash
 cd /opt/prefa-news
@@ -39,57 +34,50 @@ cp .env.example .env
 nano .env
 ```
 
-No mínimo, ajuste em produção:
+At the very least, adjust in production:
 - `APP_ENV=production`
 - `DEBUG=false`
-- `SECRET_KEY=` (gere um valor aleatório, ex.: `openssl rand -hex 32`)
-- `DATABASE_URL=` (mantenha SQLite para começar, ou aponte para Postgres
-  gerenciado — ver seção "Banco de dados" abaixo)
-- `PUBLIC_BASE_URL=https://prefa.news`
-- Credenciais de e-mail e Instagram, se forem usadas
+- `SECRET_KEY=` (generate a random value, ex.: `openssl rand -hex 32`)
+- `DATABASE_URL=` (keep SQLite to start, or point to a managed Postgres instance — see the "Database" section below)
+- `PUBLIC_BASE_URL=YOUR_URL`
+- Email and Instagram credentials, if used
 
-### 4. Subir os containers
+### 4. Load the containers
 
 ```bash
 docker compose up -d --build
 ```
 
-Isso sobe dois serviços:
-- `web`: aplicação FastAPI servida por Gunicorn+Uvicorn na porta 8000
-- `news-fetcher`: roda a ingestão de notícias a cada 30 minutos
+This spins up two services:
+- `web`: FastAPI application served by Gunicorn+Uvicorn on port 8000
+- `news-fetcher`: runs the news ingestion process every 30 minutes
 
-Verifique os logs:
+Check the logs:
 
 ```bash
 docker compose logs -f web
 docker compose logs -f news-fetcher
 ```
 
-### 5. Popular o banco (primeira vez)
+### 5. Populate the database (initial load)
 
 ```bash
-docker compose exec web python -m scripts.seed_demo_data   # opcional, dados de exemplo
-docker compose exec web python -m app.ingestion.fetch_news # ingestão real, a partir das cidades cadastradas
+docker compose exec web python -m scripts.seed_demo_data # insert cities
+docker compose exec web python -m app.ingestion.fetch_news # get news from cities
 ```
 
-> **Importante**: diferente da v1, o cadastro de cidades/feeds
-> (`city.url_path`, `city.url_type`, `city.regiao`) agora deve ser feito
-> via uma migração/seed própria ou diretamente no banco (não há mais
-> painel administrativo neste pacote). Se você tinha o `bd.db` da versão
-> PHP, veja a seção "Migrando dados da v1" mais abaixo.
-
-### 6. Configurar Nginx como proxy reverso + HTTPS
+### 6. Configure Nginx as a reverse proxy + HTTPS
 
 ```bash
 sudo apt install -y nginx certbot python3-certbot-nginx
 ```
 
-Crie `/etc/nginx/sites-available/prefa-news`:
+Create `/etc/nginx/sites-available/prefa-news`:
 
 ```nginx
 server {
     listen 80;
-    server_name prefa.news www.prefa.news;
+    server_name YOUR_URL www.YOUR_URL;
 
     location /static/ {
         alias /opt/prefa-news/app/static/;
@@ -110,202 +98,44 @@ server {
 ```bash
 sudo ln -s /etc/nginx/sites-available/prefa-news /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
-sudo certbot --nginx -d prefa.news -d www.prefa.news
+sudo certbot --nginx -d YOUR_URL -d www.YOUR_URL
 ```
 
-Pronto: o site estará em `https://prefa.news` com renovação automática
-de certificado (o certbot já agenda o cron/systemd timer de renovação).
+All set: the site will be at `YOUR_URL` with automatic
+certificate renewal (certbot already schedules the cron/systemd renewal timer).
 
-### 7. Atualizações futuras
+### 7. Future updates
 
 ```bash
 cd /opt/prefa-news
-git pull   # ou rsync novamente
+git pull
 docker compose up -d --build
 ```
 
 ---
 
-## Caminho B — Instalação manual (systemd + Nginx, sem Docker)
+## Database
 
-### 1. Instalar dependências do sistema
+By default, the project uses **SQLite** (`./data/prefa_news.db`), which is sufficient for the readership volume of a regional news portal. To scale safely:
 
-```bash
-sudo apt update
-sudo apt install -y python3.12 python3.12-venv nginx certbot python3-certbot-nginx
-```
-
-### 2. Criar usuário de serviço e enviar o código
-
-```bash
-sudo useradd -r -m -s /bin/bash prefanews
-sudo mkdir -p /opt/prefa-news
-sudo chown prefanews:prefanews /opt/prefa-news
-# copie o código para /opt/prefa-news (rsync/git clone), como usuário prefanews
-```
-
-### 3. Ambiente virtual e dependências
-
-```bash
-sudo -u prefanews bash -c "
-  cd /opt/prefa-news &&
-  python3.12 -m venv .venv &&
-  source .venv/bin/activate &&
-  pip install -r requirements.txt
-"
-```
-
-### 4. Configurar `.env`
-
-```bash
-sudo -u prefanews cp /opt/prefa-news/.env.example /opt/prefa-news/.env
-sudo -u prefanews nano /opt/prefa-news/.env
-```
-
-### 5. Criar o serviço systemd da aplicação web
-
-Crie `/etc/systemd/system/prefa-news.service`:
-
-```ini
-[Unit]
-Description=Prefa.News (FastAPI/Gunicorn)
-After=network.target
-
-[Service]
-Type=simple
-User=prefanews
-Group=prefanews
-WorkingDirectory=/opt/prefa-news
-EnvironmentFile=/opt/prefa-news/.env
-ExecStart=/opt/prefa-news/.venv/bin/gunicorn app.main:app \
-    --workers 4 \
-    --worker-class uvicorn.workers.UvicornWorker \
-    --bind 127.0.0.1:8000 \
-    --timeout 60
-Restart=on-failure
-RestartSec=5
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now prefa-news
-sudo systemctl status prefa-news
-```
-
-### 6. Agendar a ingestão de notícias com systemd timer
-
-Crie `/etc/systemd/system/prefa-news-fetch.service`:
-
-```ini
-[Unit]
-Description=Prefa.News - ingestão de notícias
-
-[Service]
-Type=oneshot
-User=prefanews
-Group=prefanews
-WorkingDirectory=/opt/prefa-news
-EnvironmentFile=/opt/prefa-news/.env
-ExecStart=/opt/prefa-news/.venv/bin/python -m app.ingestion.fetch_news
-```
-
-Crie `/etc/systemd/system/prefa-news-fetch.timer`:
-
-```ini
-[Unit]
-Description=Executa a ingestão de notícias do Prefa.News a cada 30 minutos
-
-[Timer]
-OnBootSec=2min
-OnUnitActiveSec=30min
-Unit=prefa-news-fetch.service
-
-[Install]
-WantedBy=timers.target
-```
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now prefa-news-fetch.timer
-systemctl list-timers | grep prefa-news
-```
-
-### 7. Nginx + HTTPS
-
-Igual ao Caminho A, passo 6 (ajuste o `alias` do `/static/` para
-`/opt/prefa-news/app/static/`).
-
----
-
-## Banco de dados
-
-Por padrão o projeto usa **SQLite** (`./data/prefa_news.db`), suficiente
-para o volume de leitura de um portal de notícias regional. Para crescer
-com segurança:
-
-1. Faça backup diário do arquivo SQLite (ele é um único arquivo,
-   simples de copiar):
+1. Back up the SQLite file daily (it is a single file,
+simple to copy):
    ```bash
    0 3 * * * cp /opt/prefa-news/data/prefa_news.db /opt/backups/prefa_news_$(date +\%F).db
    ```
-2. Se o tráfego crescer e você precisar de múltiplos workers escrevendo
-   simultaneamente, migre para Postgres apenas trocando `DATABASE_URL`
-   no `.env` (ex.: `postgresql+psycopg://usuario:senha@host:5432/prefa_news`)
-   e instalando o driver (`pip install psycopg[binary]`). O SQLAlchemy
-   cuida do resto — não é necessário alterar `models.py`.
-3. As migrações de schema são gerenciadas com **Alembic**. Depois de
-  atualizar o código, execute antes de reiniciar a aplicação:
+2. If traffic grows and you need multiple workers writing
+simultaneously, migrate to Postgres simply by swapping `DATABASE_URL`
+   no `.env` (ex.: `postgresql+psycopg://user:pass@host:5432/prefa_news`)
+   and installing the driver (`pip install psycopg[binary]`). SQLAlchemy handles the rest — there is no need to modify `models.py`.
+3. Schema migrations are managed with **Alembic**. After
+updating the code, run the following before restarting the application:
   ```bash
   source .venv/bin/activate
   alembic upgrade head
   ```
-  O startup ainda usa `Base.metadata.create_all` para instalações locais,
-  mas não substitui as migrations em produção.
+  The startup still uses `Base.metadata.create_all` for local installations, but it does not replace migrations in production.
 
-4. Para gerar os insights que relacionam notícias de cidades diferentes,
-  configure `GROQ_ENABLED=true` e `GROQ_API_KEY` no `.env`. A integração
-  usa a API compatível de chat da Groq; os limites gratuitos dependem do
-  plano vigente da conta Groq.
+4. To generate insights linking news from different cities, configure `GROQ_ENABLED=true` and `GROQ_API_KEY` in the `.env` file. The integration uses Groq's chat-compatible API; free limits depend on the
+current Groq account plan.
 
 ---
-
-## Migrando dados da v1 (PHP)
-
-Se você tem o `bd.db` (SQLite) da versão PHP e quer aproveitar as
-cidades e notícias já cadastradas:
-
-1. Copie o `bd.db` antigo para o servidor novo.
-2. Como o schema é equivalente (mesmas tabelas/colunas principais), é
-   possível fazer um `ATTACH DATABASE` no SQLite e copiar linha a linha:
-
-   ```sql
-   -- rode isso com sqlite3 apontando para o banco novo
-   ATTACH DATABASE '/caminho/para/bd_v1.db' AS old;
-
-   INSERT INTO city (id, name, regiao, url_type, url_path, instagram, active, lastcheck_date, lastnews_date)
-   SELECT id, name, regiao, url_type, url_path, instagram, active, lastcheck_date, lastnews_date FROM old.city;
-
-   INSERT INTO news (id, city_id, title, date, news_url, img_url, description, active, value, pub_instagram)
-   SELECT id, city_id, title, date, news_url, img_url, description, active, value, pub_instagram FROM old.news;
-   ```
-
-3. A coluna `img_url` continua existindo no schema novo (não a
-   removemos do banco, apenas paramos de exibi-la no front-end), então a
-   migração acima funciona sem alterações.
-
----
-
-## Checklist final de produção
-
-- [ ] `.env` com `DEBUG=false` e `SECRET_KEY` forte e único
-- [ ] HTTPS ativo (certbot) e renovação automática confirmada
-- [ ] `docker compose ps` (ou `systemctl status prefa-news`) mostrando
-      os serviços saudáveis
-- [ ] Timer/cron de ingestão rodando e gerando logs
-- [ ] Backup diário do banco configurado
-- [ ] `pytest` rodando verde no pipeline de CI antes de cada deploy
-- [ ] Monitoramento básico (ex.: Uptime Kuma, Healthchecks.io ou similar)
-      apontando para `https://prefa.news/`
