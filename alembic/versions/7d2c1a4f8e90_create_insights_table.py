@@ -28,6 +28,7 @@ def upgrade() -> None:
         sa.Column("news_ids", sa.JSON(), nullable=False),
         sa.Column("generated_at", sa.DateTime(), nullable=False),
         sa.PrimaryKeyConstraint("id"),
+        if_not_exists=True,
     )
     op.create_index(op.f("ix_insights_generated_at"), "insights", ["generated_at"], unique=False)
 
