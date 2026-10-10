@@ -1,4 +1,8 @@
-"""Tradução de títulos de notícias para inglês na ingestão."""
+"""
+Translated title to English using Google and MyMemory translators, with error handling and normalization.
+
+Using by fetch_news during execution of the ingestion pipeline.
+"""
 from __future__ import annotations
 
 import logging
