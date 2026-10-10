@@ -308,19 +308,6 @@ CITIES = [
     ("ZORTÉA",FeedType.IPM,"https://zortea.atende.net/cidadao/rss/noticias","prefeiturazortea",1)
 ]
 
-"""
-SAMPLE_TITLES = [
-    "Prefeitura entrega nova unidade de saúde no bairro",
-    "Município recebe prêmio estadual de gestão pública",
-    "Programa de reciclagem amplia coleta seletiva na cidade",
-    "Nova ciclovia é inaugurada na região central",
-    "Cidade lança edital de incentivo a pequenos negócios",
-    "Escola municipal é destaque nacional em avaliação de ensino",
-    "Prefeitura anuncia investimento em pavimentação de ruas",
-    "Feira de agricultura familiar movimenta economia local",
-]
-"""
-
 def run() -> None:
     Base.metadata.create_all(bind=engine)
     db = SessionLocal()
@@ -341,26 +328,6 @@ def run() -> None:
             db.add(city)
             cities.append(city)
         db.flush()
-
-        """
-        now = datetime.utcnow()
-        for i, city in enumerate(cities):
-            for j, title in enumerate(SAMPLE_TITLES):
-                db.add(
-                    News(
-                        city_id=city.id,
-                        title=f"{title} de {city.name}",
-                        date=now - timedelta(hours=i + j),
-                        news_url=f"https://exemplo.gov.br/noticia/{i}-{j}",
-                        description=(
-                            "Notícia de exemplo gerada para fins de demonstração "
-                            "e testes locais do Prefa.News."
-                        ),
-                        active=True,
-                        value=100 - (i + j),
-                    )
-                )
-        """
         db.commit()
         print(f"Seed concluído: {len(cities)} cidades.")
     finally:
