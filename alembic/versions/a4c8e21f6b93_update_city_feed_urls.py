@@ -98,6 +98,7 @@ CITY_UPDATES = (
     {"name": "CALMON", "url_type": "FECAM", "url_path": "https://calmon.sc.gov.br/feed/", 'active': 1},
     {"name": "CAMPO ALEGRE", "url_type": "FECAM", "url_path": "https://campoalegre.sc.gov.br/feed/", 'active': 1},
     {"name": "CAMPO BELO DO SUL", "url_type": "FECAM", "url_path": "https://campobelodosul.sc.gov.br/feed/", 'active': 1},
+    {"name": "CAMPO ERÊ", "url_type": "FECAM", "url_path": "https://campoere.sc.gov.br/feed/", 'active': 1},
     {"name": "CAMPOS NOVOS", "url_type": "FECAM", "url_path": "https://camposnovos.sc.gov.br/feed/", 'active': 1},
     {"name": "CAPÃO ALTO", "url_type": "FECAM", "url_path": "https://capaoalto.sc.gov.br/feed/", "active": 1},
     {"name": "CAPINZAL", "url_type": "FECAM", "url_path": "https://capinzal.sc.gov.br/feed/", "active": 1},
@@ -122,6 +123,7 @@ CITY_UPDATES = (
     {"name": "FREI ROGÉRIO", "url_type": "FECAM", "url_path": "https://freirogerio.sc.gov.br/feed/", "active": 1},
     {"name": "GALVÃO", "url_type": "FECAM", "url_path": "https://www.galvao.sc.gov.br/feed/", "active": 1},
     {"name": "GASPAR", "url_type": "FECAM", "url_path": "https://www.gaspar.sc.gov.br/feed/", "active": 1},
+    {"name": "GUABIRUBA", "url_type": "FECAM", "url_path": "https://guabiruba.sc.gov.br/feed/", "active": 1},
     {"name": "HERVAL D´OESTE", "url_type": "FECAM", "url_path": "https://hervaldoeste.sc.gov.br/feed/", "active": 1},
     {"name": "IBIAM", "url_type": "FECAM", "url_path": "https://ibiam.sc.gov.br/feed/", "active": 1},
     {"name": "IBICARÉ", "url_type": "FECAM", "url_path": "https://ibicare.sc.gov.br/feed/", 'active': 1},
@@ -175,6 +177,7 @@ CITY_UPDATES = (
     {"name": "POUSO REDONDO", "url_type": "FECAM", "url_path": "https://pousoredondo.sc.gov.br/feed/", "active": 1},
     {"name": "PRESIDENTE CASTELO BRANCO", "url_type": "FECAM", "url_path": "https://castellobranco.sc.gov.br/feed/", "active": 1},
     {"name": "QUILOMBO", "url_type": "FECAM", "url_path": "https://quilombo.sc.gov.br/feed/", 'active': 1},
+    {"name": "RANCHO QUEIMADO", "url_type": "FECAM", "url_path": "https://rq.sc.gov.br/feed/", 'active': 1},
     {"name": "RIO DAS ANTAS", "url_type": "FECAM", "url_path": "https://riodasantas.sc.gov.br/feed/", 'active': 1},
     {"name": "RIO DO OESTE", "url_type": "FECAM", "url_path": "https://riodooeste.sc.gov.br/feed/", 'active': 1},
     {"name": "RIO DOS CEDROS", "url_type": "FECAM", "url_path": "https://riodoscedros.sc.gov.br/feed/", 'active': 1},
@@ -189,6 +192,7 @@ CITY_UPDATES = (
     {"name": "SANTA TEREZINHA DO PROGRESSO", "url_type": "FECAM", "url_path": "https://staterezinhaprogresso.sc.gov.br/feed/", 'active': 1},
     {"name": "SANTIAGO DO SUL", "url_type": "FECAM", "url_path": "https://santiagodosul.sc.gov.br/feed/", 'active': 1},
     {"name": "SÃO BERNARDINO", "url_type": "FECAM", "url_path": "https://saobernardino.sc.gov.br/feed/", 'active': 1},
+    {"name": "SÃO BONIFÁCIO", "url_type": "FECAM", "url_path": "https://portal.saobonifacio.sc.gov.br/feed/", 'active': 1},
     {"name": "SÃO CRISTÓVÃO DO SUL", "url_type": "FECAM", "url_path": "https://pmsc.sc.gov.br/feed/", "active": 1},
     {"name": "SÃO DOMINGOS", "url_type": "FECAM", "url_path": "https://saodomingos.sc.gov.br/feed/", "active": 1},
     {"name": "SÃO JOÃO DO OESTE", "url_type": "FECAM", "url_path": "https://saojoao.sc.gov.br/feed/", "active": 1},
@@ -216,6 +220,7 @@ CITY_UPDATES = (
     {"name": "ITAIÓPOLIS", "url_type": "IPM", "url_path": "https://itaiopolis.atende.net/cidadao/rss/noticias", "active": 1},
     {"name": "JOSÉ BOITEUX", "url_type": "IPM", "url_path": "https://joseboiteux.atende.net/cidadao/rss/noticias", "active": 1},
     {"name": "SAUDADES", "url_type": "IPM", "url_path": "https://saudades.atende.net/cidadao/rss/noticias", "active": 1},
+    {"name": "POMERODE", "url_type": "IPM", "url_path": "https://pomerode.atende.net/cidadao/rss/noticias", "active": 1},
 )
 
 def upgrade() -> None:
