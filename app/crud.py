@@ -121,6 +121,16 @@ def load_active_cities(db: Session) -> list[str]:
     return [r[0] for r in rows]
 
 
+def load_cities_for_map(db: Session) -> list[dict]:
+    rows = db.execute(
+        select(City.name, City.active, City.url_type).order_by(City.name)
+    ).all()
+    return [
+        {"name": row.name, "active": row.active, "url_type": row.url_type}
+        for row in rows
+    ]
+
+
 def save_click(db: Session, news_id: int, click_type: str, server_meta: str) -> None:
     access = Access(news_id=news_id, type=click_type, server=server_meta)
     db.add(access)

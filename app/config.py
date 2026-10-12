@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     # Database (SQLite by default; change to Postgres/MySQL in production
     # by adjusting DATABASE_URL, as we use SQLAlchemy)
     DATABASE_URL: str = "sqlite:///./data/prefa_news.db"
+    # Optional database user/URL with SELECT-only permissions for the AI assistant.
+    READONLY_DATABASE_URL: str = ""
 
     # Newsletter / e-mail
     MAIL_HOST: str = ""
@@ -41,6 +43,11 @@ class Settings(BaseSettings):
     GROQ_API_KEY: str = ""
     GROQ_API_BASE_URL: str = ""
     GROQ_MODEL: str = ""
+
+    # Chat AI (Groq)
+    GROQ_CHAT_MAX_CONTEXT_CHARS: int = 18000
+    GROQ_CHAT_MAX_QUESTION_CHARS: int = 1000
+    GROQ_CHAT_MAX_OUTPUT_TOKENS: int = 600
 
     # CORS (if the front-end is consumed separately)
     CORS_ORIGINS: list[str] = ["*"]

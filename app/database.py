@@ -17,6 +17,22 @@ connect_args = {"check_same_thread": False} if settings.DATABASE_URL.startswith(
 engine = create_engine(settings.DATABASE_URL, connect_args=connect_args, future=True)
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False, future=True)
 
+readonly_engine = engine
+if settings.READONLY_DATABASE_URL:
+    readonly_connect_args = (
+        {"check_same_thread": False}
+        if settings.READONLY_DATABASE_URL.startswith("sqlite")
+        else {}
+    )
+    readonly_engine = create_engine(
+        settings.READONLY_DATABASE_URL,
+        connect_args=readonly_connect_args,
+        future=True,
+    )
+ReadOnlySessionLocal = sessionmaker(
+    bind=readonly_engine, autoflush=False, autocommit=False, future=True
+)
+
 
 class Base(DeclarativeBase):
     pass
@@ -25,6 +41,15 @@ class Base(DeclarativeBase):
 def get_db():
     """Dependency for FastAPI: opens and closes the session per request."""
     db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def get_readonly_db():
+    """Dependency for read-only consumers such as the AI assistant."""
+    db = ReadOnlySessionLocal()
     try:
         yield db
     finally:

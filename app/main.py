@@ -10,9 +10,9 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 
-from app import crud, schemas
+from app import chat, crud, schemas
 from app.config import get_settings
-from app.database import Base, engine, get_db
+from app.database import Base, engine, get_db, get_readonly_db
 
 settings = get_settings()
 
@@ -62,9 +62,15 @@ def search_page(request: Request, q: str = "", db: Session = Depends(get_db)):
 
 @app.get("/about", response_class=HTMLResponse)
 def about_page(request: Request, db: Session = Depends(get_db)):
-    cities = crud.load_active_cities(db)
+    cities = crud.load_cities_for_map(db)
     return templates.TemplateResponse(
-        "about.html", {"request": request, "cities": cities, "active_page": "about"}
+        "about.html",
+        {
+            "request": request,
+            "cities": cities,
+            "active_city_count": sum(city["active"] for city in cities),
+            "active_page": "about",
+        },
     )
 
 
@@ -140,6 +146,14 @@ def api_save_newsletter(payload: schemas.NewsletterIn, db: Session = Depends(get
         raise HTTPException(status_code=409, detail="Email already registered")
     crud.save_newsletter(db, payload.mail)
     return {"result": True, "message": "Email registered successfully"}
+
+
+@api.post("/chat", response_model=schemas.ChatOut)
+def api_chat(payload: schemas.ChatIn, db: Session = Depends(get_readonly_db)):
+    try:
+        return chat.answer_question(db, payload.question.strip())
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 app.include_router(api, prefix="/api")
