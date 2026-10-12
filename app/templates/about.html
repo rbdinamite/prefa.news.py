@@ -18,12 +18,29 @@
     other municipalities.</p>
 
   <h2>Monitored municipalities</h2>
-  <ul class="city-list">
-    {% for city in cities %}
-    <li>{{ city }}</li>
-    {% else %}
-    <li>No active municipalities registered yet.</li>
-    {% endfor %}
-  </ul>
+  <p>At the moment, we are monitoring {{ active_city_count }} of 295 municipalities.</p>
+  <div
+    id="municipality-map"
+    class="municipality-map"
+    data-cities="{{ cities | tojson | forceescape }}"
+    role="application"
+    aria-label="Map of Santa Catarina municipalities. Hover over a city to see its name and monitoring type."
+  ></div>
+  <div class="map-legend" aria-label="Map legend">
+    <span><i class="map-legend__swatch map-legend__swatch--fecam"></i>FECAM</span>
+    <span><i class="map-legend__swatch map-legend__swatch--ipm"></i>IPM</span>
+    <span><i class="map-legend__swatch map-legend__swatch--proprio"></i>OTHER</span>
+    <span><i class="map-legend__swatch map-legend__swatch--inactive"></i>Not monitored</span>
+  </div>
+  <p id="map-status" class="map-status" role="status">Loading municipality map…</p>
+  <p class="map-attribution">Municipality boundaries:
+    <a href="https://github.com/tbrugz/geodata-br/blob/master/geojson/geojs-42-mun.json">geodata-br</a>.
+    Two municipalities added after that dataset was created use
+    <a href="https://servicodados.ibge.gov.br/api/v3/malhas/estados/42?formato=application%2Fvnd.geo%2Bjson&intrarregiao=municipio">IBGE boundary data</a>.
+  </p>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/about-map.js"></script>
 {% endblock %}
