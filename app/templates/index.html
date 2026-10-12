@@ -6,7 +6,7 @@
 <section class="hero">
   <div class="container">
     <h1>Public news that makes a difference in Santa Catarina.</h1>
-    <p>We aggregate and highlight positive initiatives of the public power in municipalities of Santa Catarina,
+    <p>We aggregate and highlight positive initiatives of the public administration in cities of Santa Catarina,
       connecting citizens and public managers.</p>
   </div>
 </section>
@@ -49,6 +49,28 @@
   </div>
 </section>
 {% endif %}
+
+<section class="container chat-section" aria-labelledby="chat-title">
+  <div class="chat-heading">
+    <div>
+      <p class="chat-kicker">Prefa.News AI</p>
+      <h2 class="section-title" id="chat-title">Ask about the cities, news and insights</h2>
+      <p class="chat-intro">The assistant searches the public data on this page before answering.</p>
+    </div>
+  </div>
+  <div class="chat-panel">
+    <div class="chat-messages" id="chat-messages" aria-live="polite">
+      <p class="chat-empty">Try asking: “Which cities had news about education?”</p>
+    </div>
+    <form class="chat-form" id="chat-form">
+      <label class="visually-hidden" for="chat-question">Your question</label>
+      <textarea id="chat-question" name="question" rows="2" maxlength="1000"
+                placeholder="Ask a question about Prefa.News..." required></textarea>
+      <button type="submit" class="chat-submit">Ask <span aria-hidden="true">→</span></button>
+    </form>
+    <p class="form-feedback" id="chat-feedback" role="status"></p>
+  </div>
+</section>
 
 {% if insights %}
 <section class="container insights-section" aria-labelledby="insights-title">

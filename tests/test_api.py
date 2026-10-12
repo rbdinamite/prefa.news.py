@@ -80,6 +80,16 @@ def test_home_page_renders(client, seeded_data):
     assert "news_card.jpg" not in resp.text
 
 
+def test_about_page_renders_municipality_map(client, seeded_data):
+    resp = client.get("/about")
+    assert resp.status_code == 200
+    assert "monitoring 2 of 295 municipalities" in resp.text
+    assert 'id="municipality-map"' in resp.text
+    assert "Cidade Sul" in resp.text
+    assert "PROPRIO" in resp.text
+    assert "city-list" not in resp.text
+
+
 def test_region_page_renders(client, seeded_data):
     resp = client.get("/regiao/sul")
     assert resp.status_code == 200

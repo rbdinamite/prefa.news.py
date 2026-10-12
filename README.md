@@ -20,6 +20,24 @@ uvicorn app.main:app --reload
 
 Access `http://localhost:8000`.
 
+## AI chat
+
+The home page includes a RAG assistant that retrieves cities, active news and
+stored insights before asking Groq for an answer. Configure these variables in
+`.env`:
+
+```dotenv
+GROQ_ENABLED=true
+GROQ_API_KEY=your-groq-key
+GROQ_MODEL=your-groq-model
+GROQ_API_BASE_URL=https://api.groq.com/openai/v1
+READONLY_DATABASE_URL=your-select-only-database-url
+```
+
+`READONLY_DATABASE_URL` is optional in local development and should point to a
+database user with SELECT-only permissions in production. The assistant never
+writes to the database.
+
 ## Running tests
 
 ```bash

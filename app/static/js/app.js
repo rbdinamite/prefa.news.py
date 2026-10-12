@@ -148,10 +148,63 @@
     });
   }
 
+  // ---- Assistente RAG da home ----
+  function initChat() {
+    const form = qs("#chat-form");
+    const input = qs("#chat-question");
+    const messages = qs("#chat-messages");
+    const feedback = qs("#chat-feedback");
+    if (!form || !input || !messages) return;
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const question = input.value.trim();
+      if (!question) return;
+
+      const empty = qs(".chat-empty", messages);
+      if (empty) empty.remove();
+      messages.insertAdjacentHTML("beforeend", '<div class="chat-message chat-message--user">' + escapeHtml(question) + "</div>");
+      input.value = "";
+      input.disabled = true;
+      form.querySelector("button").disabled = true;
+      feedback.textContent = "Consultando as notícias e insights…";
+
+      try {
+        const response = await fetch(API_BASE + "/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question: question }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "Não foi possível consultar o assistente.");
+        const sourceLinks = (data.sources || []).slice(0, 3)
+          .filter((source) => /^https?:\/\//i.test(source.url || ""))
+          .map((source) =>
+            '<a href="' + escapeHtml(source.url) + '" target="_blank" rel="noopener noreferrer">' +
+            escapeHtml(source.city + " · " + source.title) + "</a>"
+          ).join("");
+        messages.insertAdjacentHTML("beforeend",
+          '<div class="chat-message chat-message--assistant"><p>' + escapeHtml(data.answer) + "</p>" +
+          (sourceLinks ? '<div class="chat-sources"><small>SOURCES</small>' + sourceLinks + "</div>" : "") +
+          "</div>"
+        );
+        feedback.textContent = "";
+      } catch (error) {
+        feedback.textContent = error.message;
+      } finally {
+        input.disabled = false;
+        form.querySelector("button").disabled = false;
+        input.focus();
+        messages.scrollTop = messages.scrollHeight;
+      }
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     initSectorTabs();
     initNewsCardClicks();
     initLoadMore();
     initNewsletterForm();
+    initChat();
   });
 })();

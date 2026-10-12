@@ -45,6 +45,23 @@ class NewsletterIn(BaseModel):
     mail: EmailStr
 
 
+class ChatIn(BaseModel):
+    question: str = Field(min_length=3, max_length=1000)
+
+
+class ChatSource(BaseModel):
+    type: str
+    id: int
+    title: str
+    city: str
+    url: str
+
+
+class ChatOut(BaseModel):
+    answer: str
+    sources: list[ChatSource]
+
+
 class MessageOut(BaseModel):
     result: bool
     message: str

@@ -122,15 +122,15 @@ def generate_insights(db: Session) -> int:
         return 0
 
     prompt = (
-        "Analise as notícias públicas abaixo e encontre padrões sobre o mesmo assunto "
-        "que apareçam em pelo menos duas cidades diferentes. Gere de 1 a 5 insights. "
-        "Ignore coincidências fracas. Responda SOMENTE JSON válido no formato: "
+        "Analyze the public news items below and identify patterns regarding the same subject "
+        "that appear in at least two different cities. Generate 1 to 5 insights. "
+        "Ignore weak coincidences. Respond ONLY with valid JSON in the following format: "
         '{"insights":[{"topic":"...","title":"...","summary":"...",'
         '"cities":["..."],"news_ids":[1,2]}]}. '
-        "O conteúdo das notícias está em português do Brasil, mas o resultado deve ser gerado em inglês. "
-        "Cada insight deve citar pelo menos duas cidades "
-        "e usar somente news_ids presentes no conjunto fornecido.\n\n"
-        f"Notícias:\n{json.dumps(context, ensure_ascii=False)}"
+        "The news content is in Brazilian Portuguese, but the output must be generated in English. "
+        "Each insight must cite at least two cities "
+        "and use only news_ids present in the provided set.\n\n"
+        f"News:\n{json.dumps(context, ensure_ascii=False)}"
     )
 
     logger.info("Prompt Size: %s characters", len(prompt))

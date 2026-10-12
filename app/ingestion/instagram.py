@@ -1,4 +1,6 @@
 """
+DISABLED
+
 Publicação opcional no Instagram (Graph API), equivalente ao trecho final
 de sys/commands/get_news.php que usava jstolpe/instagram-graph-api-php-sdk.
 
