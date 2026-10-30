@@ -42,9 +42,8 @@ def on_startup() -> None:
 
 @app.get("/", response_class=HTMLResponse)
 def home(request: Request, db: Session = Depends(get_db)):
-    news = crud.load_main_news(db, sector=None, search=None)
+    news = crud.load_main_news(db, search=None)
     insights = crud.load_insights(db)
-    #sectors = crud.load_sector_news(db, search=None)
     return templates.TemplateResponse(
         "index.html",
         {"request": request, "news": news, "insights": insights, "active_page": "home"},
@@ -53,7 +52,7 @@ def home(request: Request, db: Session = Depends(get_db)):
 
 @app.get("/search", response_class=HTMLResponse)
 def search_page(request: Request, q: str = "", db: Session = Depends(get_db)):
-    news = crud.load_main_news(db, sector=None, search=q) if q else {"main": [], "side": [], "roller": [], "more": []}
+    news = crud.load_main_news(db, search=q) if q else {"main": [], "side": [], "roller": [], "more": []}
     return templates.TemplateResponse(
         "search.html",
         {"request": request, "news": news, "query": q, "active_page": "search"},
@@ -88,29 +87,27 @@ api = APIRouter()
 
 @api.get("/news/main", response_model=schemas.NewsBlock)
 def api_main_news(
-    sector: str | None = Query(default=None),
     search: str | None = Query(default=None),
     db: Session = Depends(get_db),
 ):
-    data = crud.load_main_news(db, sector, search)
+    data = crud.load_main_news(db, search)
     return data
 
 
 @api.get("/news/more-fixed", response_model=list[schemas.NewsOut])
 def api_more_fixed(
-    sector: str | None = None, search: str | None = None, db: Session = Depends(get_db)
+    search: str | None = None, db: Session = Depends(get_db)
 ):
-    return crud.load_more_fixed_news(db, sector, search)
+    return crud.load_more_fixed_news(db, search)
 
 
 @api.get("/news/more", response_model=list[schemas.NewsOut])
 def api_more_by_pointer(
     pointer: int = 0,
-    sector: str | None = None,
     search: str | None = None,
     db: Session = Depends(get_db),
 ):
-    return crud.load_more_by_pointer(db, pointer, sector, search)
+    return crud.load_more_by_pointer(db, pointer, search)
 
 
 @api.get("/news/highlights", response_model=list[schemas.NewsOut])

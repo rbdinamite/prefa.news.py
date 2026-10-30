@@ -1,11 +1,5 @@
 """
-Camada de consultas que substitui o sys/controller.php original.
-
-Diferença importante em relação ao PHP: lá o parâmetro `search` e `sector`
-eram concatenados diretamente na query SQL (`'AND N.title LIKE "%' . $_GET['search'] . '%"'`),
-o que é uma falha clássica de SQL Injection. Aqui todas as condições usam
-bind parameters via SQLAlchemy, então a mesma classe de vulnerabilidade
-não existe mais.
+Works as CONTROLLER in the project, using SQLAlchemy to query the database and return results in a format suitable for the API.
 """
 from __future__ import annotations
 
@@ -22,7 +16,6 @@ def _base_news_query():
         select(
             News.id,
             City.name.label("city"),
-            #func.substr(City.regiao, 1, 2).label("reg_code"),
             News.title,
             News.date,
             News.news_url.label("link"),
@@ -33,9 +26,7 @@ def _base_news_query():
     )
 
 
-def _apply_filters(query, sector: str | None, search: str | None):
-    #if sector:
-        #query = query.where(City.regiao == sector)
+def _apply_filters(query, search: str | None):    
     if search:
         query = query.where(News.title.ilike(f"%{search}%"))
     return query
@@ -45,8 +36,8 @@ def _rows_to_dicts(rows) -> list[dict]:
     return [dict(row._mapping) for row in rows]
 
 
-def load_main_news(db: Session, sector: str | None, search: str | None) -> dict:
-    base = _apply_filters(_base_news_query(), sector, search).order_by(
+def load_main_news(db: Session, search: str | None) -> dict:
+    base = _apply_filters(_base_news_query(), search).group_by(News.city_id).order_by(
         News.value.desc(), News.date.desc()
     )
     main = db.execute(base.limit(7)).all()
@@ -99,18 +90,18 @@ def load_insights(db: Session, limit: int = 5) -> list[dict]:
         for insight in rows
     ]
 
-def load_more_fixed_news(db: Session, sector: str | None, search: str | None) -> list[dict]:
-    query = _apply_filters(_base_news_query(), sector, search).order_by(
+def load_more_fixed_news(db: Session, search: str | None) -> list[dict]:
+    query = _apply_filters(_base_news_query(), search).order_by(
         News.value.desc(), News.date.desc()
     ).offset(21).limit(8)
     return _rows_to_dicts(db.execute(query).all())
 
 
 def load_more_by_pointer(
-    db: Session, pointer: int, sector: str | None, search: str | None
+    db: Session, pointer: int, search: str | None
 ) -> list[dict]:
     pointer = max(pointer, 0)
-    query = _apply_filters(_base_news_query(), sector, search).order_by(
+    query = _apply_filters(_base_news_query(), search).order_by(
         News.value.desc(), News.date.desc()
     ).offset(pointer).limit(4)
     return _rows_to_dicts(db.execute(query).all())
