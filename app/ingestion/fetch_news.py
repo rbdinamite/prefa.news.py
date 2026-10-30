@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import sys
+import time
 from datetime import datetime, timezone, timedelta
 
 from sqlalchemy import func, select
@@ -78,27 +79,22 @@ def fetch_new_news(db) -> int:
         city.lastcheck_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         city.lastnews_date = newest.published_at.strftime("%Y-%m-%d")
         
-        for item in items:
-            # Executing translate function
-            title_en = translate_title_to_english(item.title)
-
+        for item in items: 
+            # Check if news already exists in the database (same city, date, and title_pt)           
             exists = db.execute(
                 select(func.count(News.id)).where(
                     News.city_id == city.id,
                     News.date == item.published_at,
-                    News.title == title_en,
+                    News.title_pt == item.title,
                 )
             ).scalar()
             if exists:
                 continue
             try:
-                logger.info(
-                    "News to insert: City [%s] [%s] [%s] (original: [%s])",
-                    city.name,
-                    item.published_at,
-                    title_en,
-                    item.title,
-                )
+                # Executing translate function
+                # Using time.sleep to avoid hitting the translation API too quickly
+                time.sleep(1)
+                title_en = translate_title_to_english(item.title)
                 
                 news = News(
                     city_id=city.id,
