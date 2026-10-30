@@ -37,8 +37,34 @@ def _rows_to_dicts(rows) -> list[dict]:
 
 
 def load_main_news(db: Session, search: str | None) -> dict:
-    base = _apply_filters(_base_news_query(), search).group_by(News.city_id).order_by(
-        News.value.desc(), News.date.desc()
+    ranked_news = (
+        _apply_filters(_base_news_query(), search)
+        .add_columns(
+            News.value.label("value"),
+            func.row_number()
+            .over(
+                partition_by=News.city_id,
+                order_by=(News.value.desc(), News.date.desc(), News.id.desc()),
+            )
+            .label("city_rank"),
+        )
+        .subquery()
+    )
+    base = (
+        select(
+            ranked_news.c.id,
+            ranked_news.c.city,
+            ranked_news.c.title,
+            ranked_news.c.date,
+            ranked_news.c.link,
+            ranked_news.c.description,
+        )
+        .where(ranked_news.c.city_rank == 1)
+        .order_by(
+            ranked_news.c.value.desc(),
+            ranked_news.c.date.desc(),
+            ranked_news.c.id.desc(),
+        )
     )
     main = db.execute(base.limit(7)).all()
     side = db.execute(base.offset(7).limit(4)).all()

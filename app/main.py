@@ -78,9 +78,9 @@ def support_page(request: Request):
     return templates.TemplateResponse("support.html", {"request": request, "active_page": "support"})
 
 
-# ---------------------------------------------------------------------------
-# API JSON (equivalent to the actions of the old sys/controller.php)
-# ---------------------------------------------------------------------------
+# ---------
+# API JSON
+# ---------
 
 api = APIRouter()
 
