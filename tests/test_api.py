@@ -7,6 +7,15 @@ def test_main_news_returns_ordered_blocks(client, seeded_data):
     assert data["main"][0]["title"].startswith("Notícia especial do norte")
 
 
+def test_main_news_returns_only_one_news_per_city(client, seeded_data):
+    resp = client.get("/api/news/main")
+    assert resp.status_code == 200
+    data = resp.json()
+    all_news = data["main"] + data["side"] + data["roller"] + data["more"]
+
+    assert [news["city"] for news in all_news] == ["Cidade Norte", "Cidade Sul"]
+
+
 def test_inactive_news_never_appears(client, seeded_data):
     resp = client.get("/api/news/main")
     titles = [n["title"] for block in resp.json().values() for n in block]
