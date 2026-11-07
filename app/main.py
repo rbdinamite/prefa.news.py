@@ -30,6 +30,18 @@ templates = Jinja2Templates(directory="app/templates")
 templates.env.globals["current_year"] = datetime.utcnow().year
 
 
+def format_display_date(value: datetime | str | None) -> str:
+    if not value:
+        return "N/A"
+    date_value = (
+        datetime.strptime(value, "%Y-%m-%d") if isinstance(value, str) else value
+    )
+    return f"{date_value.strftime('%b')} {date_value.day}, {date_value.year}"
+
+
+templates.env.filters["display_date"] = format_display_date
+
+
 @app.on_event("startup")
 def on_startup() -> None:
     # In production prefer Alembic; for simplicity local/demo we create the tables automatically if they don't exist.
@@ -62,11 +74,13 @@ def search_page(request: Request, q: str = "", db: Session = Depends(get_db)):
 @app.get("/about", response_class=HTMLResponse)
 def about_page(request: Request, db: Session = Depends(get_db)):
     cities = crud.load_cities_for_map(db)
+    active_cities = crud.load_active_city_status(db)
     return templates.TemplateResponse(
         "about.html",
         {
             "request": request,
             "cities": cities,
+            "active_cities": active_cities,
             "active_city_count": sum(city["active"] for city in cities),
             "active_page": "about",
         },

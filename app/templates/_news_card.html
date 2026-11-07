@@ -3,7 +3,7 @@
          data-news-id="{{ item.id }}" data-news-link="{{ item.link }}">
   <div class="news-card__eyebrow">
     <span class="region-tag">{{ item.city }}</span>
-    <time datetime="{{ item.date.strftime('%Y-%m-%d') if item.date.strftime else item.date }}">{{ item.date.strftime('%b') ~ ' ' ~ item.date.day ~ ', ' ~ item.date.strftime('%Y') if item.date.strftime else item.date }}</time>
+    <time datetime="{{ item.date.strftime('%Y-%m-%d') if item.date.strftime else item.date }}">{{ item.date | display_date }}</time>
   </div>
   <h3 class="news-card__title">
     <a href="{{ item.link }}" target="_blank" rel="noopener noreferrer" class="news-open-link">{{ item.title }}</a>

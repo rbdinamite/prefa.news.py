@@ -148,6 +148,23 @@ def load_cities_for_map(db: Session) -> list[dict]:
     ]
 
 
+def load_active_city_status(db: Session) -> list[dict[str, str | None]]:
+    rows = db.execute(
+        select(City.name, City.url_type, City.lastcheck_date, City.lastnews_date)
+        .where(City.active.is_(True))
+        .order_by(City.lastcheck_date.desc(), City.lastnews_date.desc())
+    ).all()
+    return [
+        {
+            "name": row.name,
+            "url_type": row.url_type,
+            "lastcheck_date": row.lastcheck_date,
+            "lastnews_date": row.lastnews_date,
+        }
+        for row in rows
+    ]
+
+
 def save_click(db: Session, news_id: int, click_type: str, server_meta: str) -> None:
     access = Access(news_id=news_id, type=click_type, server=server_meta)
     db.add(access)

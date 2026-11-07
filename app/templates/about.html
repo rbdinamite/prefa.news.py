@@ -38,6 +38,42 @@
     Two municipalities added after that dataset was created use
     <a href="https://servicodados.ibge.gov.br/api/v3/malhas/estados/42?formato=application%2Fvnd.geo%2Bjson&intrarregiao=municipio">IBGE boundary data</a>.
   </p>
+
+  <section class="city-status" aria-labelledby="city-status-title">
+    <h2 id="city-status-title">Active municipality status</h2>
+    <div class="city-status-table-wrapper">
+      <table class="city-status-table">
+        <thead>
+          <tr>
+            <th scope="col">Municipality</th>
+            <th scope="col">Type</th>
+            <th scope="col">Last checked</th>
+            <th scope="col">Last news</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for city in active_cities %}
+          <tr>
+            <th scope="row">{{ city.name }}</th>
+            <td>{{ city.url_type }}</td>
+            <td>
+              <time{% if city.lastcheck_date %} datetime="{{ city.lastcheck_date }}"{% endif %}>
+                {{ city.lastcheck_date | display_date }}
+              </time>
+            </td>
+            <td>
+              <time{% if city.lastnews_date %} datetime="{{ city.lastnews_date }}"{% endif %}>
+                {{ city.lastnews_date | display_date }}
+              </time>
+            </td>
+          </tr>
+          {% else %}
+          <tr><td colspan="4">No active municipalities.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
 </section>
 {% endblock %}
 
