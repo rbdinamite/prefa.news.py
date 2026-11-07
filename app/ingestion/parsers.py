@@ -20,6 +20,7 @@ from datetime import datetime, timezone
 from time import mktime
 
 import feedparser
+import requests
 
 from app.models import FeedType
 
@@ -73,20 +74,62 @@ def parse_feed(url: str, feed_type: str, limit: int = 5, timeout: int = 15) -> l
     Faz o parse de um feed RSS/Atom e devolve uma lista normalizada de
     itens, independente do "layout" original (IPM, FECAM, PROPRIO).
     """
-    parsed = feedparser.parse(url, request_headers={"User-Agent": "PrefaNewsBot/2.0"})
-    items: list[RawNewsItem] = []
-    for entry in parsed.entries[:limit]:
-        title = clean_malformed_entities(strip_html(entry.get("title", "")))
+    if feed_type == FeedType.IPM:
+        parsed = feedparser.parse(url, request_headers={"User-Agent": "PrefaNewsBot/2.0"})
+        items: list[RawNewsItem] = []
+        for entry in parsed.entries[:limit]:
+            title = clean_malformed_entities(strip_html(entry.get("title", "")))
+            if not title:
+                continue
+            description, has_full_content = _entry_description(entry, feed_type)
+            items.append(
+                RawNewsItem(
+                    title=title,
+                    link=entry.get("link", ""),
+                    published_at=_entry_datetime(entry),
+                    description=description,
+                    has_full_content=has_full_content,
+                )
+            )
+        return items
+    elif feed_type == FeedType.FECAM: # For FECAM feeds, use WORPRESS API, because the original one is blocked (403)
+        return parse_wordpress_api(url, limit=limit, timeout=timeout)
+
+def parse_wordpress_api(url: str, limit: int = 5, timeout: int = 15) -> list[RawNewsItem]:
+    response = requests.get(
+        url,
+        params={
+            "per_page": limit,
+            "_fields": "date_gmt,link,title,excerpt,content",
+        },
+        headers={
+            "Accept": "application/json",
+            "User-Agent": "PrefaNewsBot/2.0",
+        },
+        timeout=timeout,
+    )
+    response.raise_for_status()
+
+    items = []
+    for post in response.json():
+        title = clean_malformed_entities(
+            strip_html(post.get("title", {}).get("rendered", ""))
+        )
         if not title:
             continue
-        description, has_full_content = _entry_description(entry, feed_type)
-        items.append(
-            RawNewsItem(
-                title=title,
-                link=entry.get("link", ""),
-                published_at=_entry_datetime(entry),
-                description=description,
-                has_full_content=has_full_content,
-            )
-        )
+
+        content = post.get("content", {}).get("rendered", "")
+        excerpt = post.get("excerpt", {}).get("rendered", "")
+        published = datetime.fromisoformat(post["date_gmt"])
+        if published.tzinfo is None:
+            published = published.replace(tzinfo=timezone.utc)
+
+        items.append(RawNewsItem(
+            title=title,
+            link=post.get("link", ""),
+            published_at=published.astimezone(timezone.utc).replace(tzinfo=None),
+            description=strip_html(content or excerpt),
+            has_full_content=bool(content),
+        ))
+
     return items

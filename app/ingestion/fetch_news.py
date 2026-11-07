@@ -66,17 +66,18 @@ def fetch_new_news(db) -> int:
             continue
 
         if not items:
+            logger.warning("Empty answer from [%s] [%s]", city.name, city.url_path)
             continue
         
         newest = items[0]
+        city.lastcheck_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         age_days = (datetime.now() - newest.published_at).days
         logger.info("Last news from [%s]: %s (%s days ago)", city.name, newest.published_at.date(), age_days)
         if age_days > settings.NEWS_MAX_AGE_DAYS_TO_IGNORE_CITY:
             logger.info("Feed from [%s] is old (>%s days). Ignoring city.",
                         city.name, settings.NEWS_MAX_AGE_DAYS_TO_IGNORE_CITY)
             continue
-
-        city.lastcheck_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        
         city.lastnews_date = newest.published_at.strftime("%Y-%m-%d")
         
         for item in items: 
