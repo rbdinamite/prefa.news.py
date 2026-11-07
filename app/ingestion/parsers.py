@@ -13,6 +13,8 @@ mais rápida e resiliente.
 """
 from __future__ import annotations
 
+import logging
+import sys
 import html
 import re
 from dataclasses import dataclass
@@ -23,6 +25,13 @@ import feedparser
 import requests
 
 from app.models import FeedType
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] %(levelname)s %(message)s",
+    handlers=[logging.StreamHandler(sys.stdout)],
+)
+logger = logging.getLogger("prefa_news.ingestion")
 
 _TAG_RE = re.compile(r"<[^>]+>")
 _WORDPRESS_MAX_ATTEMPTS = 3
@@ -98,7 +107,9 @@ def parse_feed(url: str, feed_type: str, limit: int = 5, timeout: int = 15) -> l
         return parse_wordpress_api(url, limit=limit, timeout=timeout)
 
 def parse_wordpress_api(url: str, limit: int = 5, timeout: int = 15) -> list[RawNewsItem]:
+    logger.info("Trying to fetch news from WordPress API: %s - Attemps: %s", url, _WORDPRESS_MAX_ATTEMPTS)
     for attempt in range(_WORDPRESS_MAX_ATTEMPTS):
+        logger.info("Attempt %s/%s", attempt + 1, _WORDPRESS_MAX_ATTEMPTS)
         try:
             response = requests.get(
                 url,
@@ -116,6 +127,7 @@ def parse_wordpress_api(url: str, limit: int = 5, timeout: int = 15) -> list[Raw
         except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
             if attempt == _WORDPRESS_MAX_ATTEMPTS - 1:
                 raise
+            logger.info("Attempt %s/%s failed. Retrying...", attempt + 1, _WORDPRESS_MAX_ATTEMPTS)
             sleep(0.5 * (2**attempt))
 
     response.raise_for_status()
