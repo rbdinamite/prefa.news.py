@@ -17,7 +17,7 @@ import html
 import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
-from time import mktime
+from time import mktime, sleep
 
 import feedparser
 import requests
@@ -25,6 +25,8 @@ import requests
 from app.models import FeedType
 
 _TAG_RE = re.compile(r"<[^>]+>")
+_WORDPRESS_MAX_ATTEMPTS = 3
+_WORDPRESS_CONNECT_TIMEOUT = 5
 
 
 def strip_html(raw: str | None) -> str:
@@ -96,18 +98,26 @@ def parse_feed(url: str, feed_type: str, limit: int = 5, timeout: int = 15) -> l
         return parse_wordpress_api(url, limit=limit, timeout=timeout)
 
 def parse_wordpress_api(url: str, limit: int = 5, timeout: int = 15) -> list[RawNewsItem]:
-    response = requests.get(
-        url,
-        params={
-            "per_page": limit,
-            "_fields": "date_gmt,link,title,excerpt,content",
-        },
-        headers={
-            "Accept": "application/json",
-            "User-Agent": "PrefaNewsBot/2.0",
-        },
-        timeout=timeout,
-    )
+    for attempt in range(_WORDPRESS_MAX_ATTEMPTS):
+        try:
+            response = requests.get(
+                url,
+                params={
+                    "per_page": limit,
+                    "_fields": "date_gmt,link,title,excerpt,content",
+                },
+                headers={
+                    "Accept": "application/json",
+                    "User-Agent": "PrefaNewsBot/2.0",
+                },
+                timeout=(_WORDPRESS_CONNECT_TIMEOUT, timeout),
+            )
+            break
+        except (requests.exceptions.ConnectionError, requests.exceptions.Timeout):
+            if attempt == _WORDPRESS_MAX_ATTEMPTS - 1:
+                raise
+            sleep(0.5 * (2**attempt))
+
     response.raise_for_status()
 
     items = []
