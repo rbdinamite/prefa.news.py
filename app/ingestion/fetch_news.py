@@ -53,7 +53,7 @@ def fetch_new_news(db) -> int:
             logger.info("City [%s] use specific layout (without feed). Ignoring.", city.name)
             continue
 
-        logger.info("Checking news from [%s] - layout [%s]", city.name, city.url_type)
+        logger.info("Checking news from [%s] - layout [%s] - [%s]", city.name, city.url_type, city.url_path)
         try:
             items = parse_feed(
                 city.url_path,
