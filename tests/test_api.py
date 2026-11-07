@@ -99,6 +99,29 @@ def test_about_page_renders_municipality_map(client, seeded_data):
     assert "city-list" not in resp.text
 
 
+def test_about_page_lists_active_cities_with_formatted_dates(client, db_session):
+    active_city = City(
+        name="Active City",
+        active=True,
+        lastcheck_date="2026-10-24",
+        lastnews_date="2026-10-22",
+    )
+    city_without_dates = City(name="City Without Dates", active=True)
+    inactive_city = City(name="Inactive City", active=False)
+    db_session.add_all([active_city, city_without_dates, inactive_city])
+    db_session.commit()
+
+    resp = client.get("/about")
+
+    assert resp.status_code == 200
+    assert "<th scope=\"row\">Active City</th>" in resp.text
+    assert "Oct 24, 2026" in resp.text
+    assert "Oct 22, 2026" in resp.text
+    assert "<th scope=\"row\">Inactive City</th>" not in resp.text
+    assert "N/A" in resp.text
+    assert resp.text.index("map-attribution") < resp.text.index("city-status-table")
+
+
 def test_region_page_renders(client, seeded_data):
     resp = client.get("/regiao/sul")
     assert resp.status_code == 200
